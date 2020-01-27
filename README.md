@@ -22,6 +22,6 @@ How it works:
 Why do we need to convert our syntax tree to byte code, you may ask? Because it will be calculated faster (i am planning to make a graph calculator using this library, so there will be a lot of cauculations)
 
 Sources:
-  https://youtu.be/eF9qWbuQLuw
-  https://en.wikipedia.org/wiki/Abstract_syntax_tree
-  https://en.wikipedia.org/wiki/Shunting-yard_algorithm
+  - https://youtu.be/eF9qWbuQLuw
+  - https://en.wikipedia.org/wiki/Abstract_syntax_tree
+  - https://en.wikipedia.org/wiki/Shunting-yard_algorithm
