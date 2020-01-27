@@ -1,6 +1,6 @@
 # lexCalculator
 
-lexCalculator is a C# DLL library for parsing and evaluating math expressions. 
+lexCalculator is a C# DLL for parsing and evaluating math expressions. 
 It supports:
   * Number literals (both decimal & scientific notation)
   * Basic rithmetic operations
