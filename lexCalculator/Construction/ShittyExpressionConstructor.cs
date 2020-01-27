@@ -5,7 +5,7 @@ using lexCalculator.Parsing;
 
 namespace lexCalculator.Construction
 {
-	// it's a horrible class, but class is named ShittyExpressionConstructor after all :D
+	// it's a horrible class, but is's "Shitty" after all :D
 	public class ShittyExpressionConstructor : IExpressionConstructor
 	{
 		class ConstructionContext
@@ -77,12 +77,12 @@ namespace lexCalculator.Construction
 				case SymbolToken symbolToken:
 				{
 					// (expression)
-					if (ParserRules.IsLeftBracketChar(symbolToken.Symbol))
+					if (symbolToken.Symbol == '(')
 					{
 						ExpressionTreeNode node = ParseExpression(context, ')');
 						if (context.TryPeekNextToken(out Token parentnesisEndToken) &&
-						parentnesisEndToken as SymbolToken != null &&
-						ParserRules.IsRightBracketChar(((SymbolToken)parentnesisEndToken).Symbol))
+						parentnesisEndToken is SymbolToken parentnesisEndSymbolToken &&
+						parentnesisEndSymbolToken.Symbol == ')')
 						{
 							context.EatLastToken(); // eat right brackets
 							return node;
@@ -90,12 +90,12 @@ namespace lexCalculator.Construction
 						throw new Exception("Mismatched brackets");
 					}
 					// |expression|
-					else if (ParserRules.IsAbsoluteChar(symbolToken.Symbol))
+					else if (symbolToken.Symbol == '|')
 					{
 						ExpressionTreeNode node = ParseExpression(context, '|');
-						if (context.TryPeekNextToken(out Token parentnesisEndToken) &&
-						parentnesisEndToken as SymbolToken != null &&
-						ParserRules.IsAbsoluteChar(((SymbolToken)parentnesisEndToken).Symbol))
+						if (context.TryPeekNextToken(out Token parentnesisEndToken) && 
+							parentnesisEndToken is SymbolToken parentnesisEndSymbolToken &&
+							parentnesisEndSymbolToken.Symbol == '|')
 						{
 							context.EatLastToken(); // eat right brackets
 							return new UnaryOperationTreeNode(UnaryOperation.Absolute, node);
@@ -103,12 +103,12 @@ namespace lexCalculator.Construction
 						throw new Exception("Mismatched brackets");
 					}
 					// -term
-					else if (ParserRules.IsMinusChar(symbolToken.Symbol))
+					else if (symbolToken.Symbol == '-')
 					{
 						return new UnaryOperationTreeNode(UnaryOperation.Negative, ParseTermWithPossibleFactorial(context));
 					}
 					// +term
-					else if (ParserRules.IsPlusChar(symbolToken.Symbol))
+					else if (symbolToken.Symbol == '+')
 					{
 						return ParseTermWithPossibleFactorial(context);
 					}
@@ -118,23 +118,23 @@ namespace lexCalculator.Construction
 				case IdentifierToken identifierToken:
 				{
 					// variable
-					if (!context.TryGetNextToken(out Token nextToken))
+					if (!context.TryPeekNextToken(out Token nextToken))
 					{
 						return new VariableTreeNode(identifierToken.Identifier);
 					}
-					else if (nextToken as SymbolToken == null || !ParserRules.IsLeftBracketChar(((SymbolToken)nextToken).Symbol))
+					else if (!(nextToken is SymbolToken nextSymbolToken && nextSymbolToken.Symbol == '('))
 					{
-						context.PutBackToken();
 						return new VariableTreeNode(identifierToken.Identifier);
 					}
 
 					// if we are here, then it's a function
+					context.EatLastToken(); // eat left brackets
 
 					// check if it has any parameters
 					// func()
-					if (context.TryPeekNextToken(out Token emptyFuncToken) && 
-						emptyFuncToken as SymbolToken != null &&
-						ParserRules.IsRightBracketChar(((SymbolToken)emptyFuncToken).Symbol))
+					if (context.TryPeekNextToken(out Token emptyFuncToken) &&
+						emptyFuncToken is SymbolToken emptyFuncSymbolToken &&
+						emptyFuncSymbolToken.Symbol == ')')
 					{
 						context.EatLastToken(); // eat right brackets
 						return new FunctionTreeNode(identifierToken.Identifier, new ExpressionTreeNode[0]);
@@ -148,11 +148,11 @@ namespace lexCalculator.Construction
 						ExpressionTreeNode parameter = ParseExpression(context, ',', ')');
 						parameters.Add(parameter);
 
-						if (context.TryGetNextToken(out Token delimToken) && delimToken as SymbolToken != null)
+						if (context.TryGetNextToken(out Token delimToken) && delimToken is SymbolToken delimSymbolToken)
 						{
-							if (ParserRules.IsCommaChar(((SymbolToken)delimToken).Symbol)) continue;
-							if (ParserRules.IsRightBracketChar(((SymbolToken)delimToken).Symbol)) break;
-							throw new Exception(String.Format("Can't parse function (unknown delimeter token '{0}')", delimToken));
+							if (delimSymbolToken.Symbol == ',') continue;
+							if (delimSymbolToken.Symbol == ')') break;
+							throw new Exception(String.Format("Can't parse function (unknown delimeter token '{0}')", delimSymbolToken));
 						}
 						// if we're here, then something is wrong
 						throw new Exception(String.Format("Can't parse function (no delimeter token)"));
@@ -177,8 +177,8 @@ namespace lexCalculator.Construction
 			ExpressionTreeNode term = ParseTerm(context);
 
 			while (context.TryPeekNextToken(out Token factorialToken) &&
-				factorialToken as SymbolToken != null &&
-				ParserRules.IsFactorialChar(((SymbolToken)factorialToken).Symbol))
+				factorialToken is SymbolToken factorialSymbolToken &&
+				factorialSymbolToken.Symbol == '!')
 			{
 				context.TryGetNextToken(out factorialToken); // eat factorial token
 
@@ -191,10 +191,11 @@ namespace lexCalculator.Construction
 		void PopOperatorAndPushResult(Stack<ExpressionTreeNode> termStack, Stack<char> operatorStack)
 		{
 			BinaryOperation operation = OperatorRules.CharToBinaryOperator(operatorStack.Pop());
-			// note: operators are in the reverse order because stack.
+			// note: operators are popped in the reverse order because stack.
 			ExpressionTreeNode rightChild = termStack.Pop();
 			ExpressionTreeNode leftChild = termStack.Pop();
-			termStack.Push(new BinaryOperationTreeNode(operation, leftChild, rightChild));
+			ExpressionTreeNode result = new BinaryOperationTreeNode(operation, leftChild, rightChild);
+			termStack.Push(result);
 		}
 
 		// expression is parsed using Dijkstra's shunting-yard algorithm.

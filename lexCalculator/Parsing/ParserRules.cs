@@ -18,20 +18,10 @@ namespace lexCalculator.Parsing
 		{
 			return (symbol == '+' || symbol == '-');
 		}
-
-		public static bool IsLeftBracketChar(char symbol)
-		{
-			return (symbol == '(');
-		}
-
-		public static bool IsRightBracketChar(char symbol)
-		{
-			return (symbol == ')');
-		}
 		
 		public static bool IsBracketChar(char symbol)
 		{
-			return (IsLeftBracketChar(symbol) || IsRightBracketChar(symbol) || symbol == '|');
+			return ((symbol == '(')|| (symbol == ')') || (symbol == '|'));
 		}
 
 		public static bool IsBinaryOperatorChar(char symbol)
@@ -48,72 +38,7 @@ namespace lexCalculator.Parsing
 			}
 			return false;
 		}
-
-		public static bool IsUnaryOperatorChar(char symbol)
-		{
-			switch (symbol)
-			{
-				case '!':
-					return true;
-			}
-			return false;
-		}
-
-		public static bool IsOperatorChar(char symbol)
-		{
-			return (IsUnaryOperatorChar(symbol) || IsBinaryOperatorChar(symbol));
-		}
-
-		public static bool IsCommaChar(char symbol)
-		{
-			return (symbol == ',');
-		}
-
-		public static bool IsWhiteSpaceChar(char symbol)
-		{
-			return (Char.IsWhiteSpace(symbol));
-		}
-
-		public static bool IsPlusChar(char symbol)
-		{
-			return (symbol == '+');
-		}
-
-		public static bool IsMinusChar(char symbol)
-		{
-			return (symbol == '-');
-		}
-
-		public static bool IsMultiplyChar(char symbol)
-		{
-			return (symbol == '*');
-		}
-
-		public static bool IsDivideChar(char symbol)
-		{
-			return (symbol == '/');
-		}
-
-		public static bool IsPowerChar(char symbol)
-		{
-			return (symbol == '^');
-		}
-
-		public static bool IsRemainderChar(char symbol)
-		{
-			return (symbol == '%');
-		}
-
-		internal static bool IsAbsoluteChar(char symbol)
-		{
-			return (symbol == '|');
-		}
-
-		public static bool IsFactorialChar(char symbol)
-		{
-			return (symbol == '!');
-		}
-
+		
 		public static bool IsValidNumberFirstChar(char symbol)
 		{
 			return (Char.IsDigit(symbol) || IsDecimalPointChar(symbol));
