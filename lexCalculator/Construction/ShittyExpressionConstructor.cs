@@ -1,0 +1,259 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using lexCalculator.Parsing;
+
+namespace lexCalculator.Construction
+{
+	// it's a horrible class, but class is named ShittyExpressionConstructor after all :D
+	public class ShittyExpressionConstructor : IExpressionConstructor
+	{
+		class ConstructionContext
+		{
+			Token[] tokens;
+			public int currentToken;
+
+			public bool TryGetNextToken(out Token token)
+			{
+				if (currentToken > tokens.Length)
+				{
+					token = null;
+					return false;
+				}
+
+				token = tokens[currentToken - 1];
+				++currentToken;
+				return true;
+			}
+
+			public bool TryPeekNextToken(out Token token)
+			{
+				if (currentToken > tokens.Length)
+				{
+					token = null;
+					return false;
+				}
+
+				token = tokens[currentToken - 1];
+				return true;
+			}
+
+			public void PutBackToken()
+			{
+				if (currentToken <= 0)
+				{
+					throw new Exception("No tokens to put back");
+				}
+
+				--currentToken;
+			}
+
+			public void EatLastToken()
+			{
+				if (currentToken > tokens.Length)
+				{
+					throw new Exception("No tokens to eat");
+				}
+
+				++currentToken;
+			}
+
+			public ConstructionContext(Token[] tokens)
+			{
+				this.tokens = (Token[])tokens.Clone();
+				this.currentToken = 1;
+			}
+		}
+
+		ExpressionTreeNode ParseTerm(ConstructionContext context)
+		{
+			if (!context.TryGetNextToken(out Token token))
+			{
+				throw new Exception("No tokens for term to parse");
+			}
+
+			switch (token)
+			{
+				case SymbolToken symbolToken:
+				{
+					// (expression)
+					if (ParserRules.IsLeftBracketChar(symbolToken.Symbol))
+					{
+						ExpressionTreeNode node = ParseExpression(context, ')');
+						if (context.TryPeekNextToken(out Token parentnesisEndToken) &&
+						parentnesisEndToken as SymbolToken != null &&
+						ParserRules.IsRightBracketChar(((SymbolToken)parentnesisEndToken).Symbol))
+						{
+							context.EatLastToken(); // eat right brackets
+							return node;
+						}
+						throw new Exception("Mismatched brackets");
+					}
+					// |expression|
+					else if (ParserRules.IsAbsoluteChar(symbolToken.Symbol))
+					{
+						ExpressionTreeNode node = ParseExpression(context, '|');
+						if (context.TryPeekNextToken(out Token parentnesisEndToken) &&
+						parentnesisEndToken as SymbolToken != null &&
+						ParserRules.IsAbsoluteChar(((SymbolToken)parentnesisEndToken).Symbol))
+						{
+							context.EatLastToken(); // eat right brackets
+							return new UnaryOperationTreeNode(UnaryOperation.Absolute, node);
+						}
+						throw new Exception("Mismatched brackets");
+					}
+					// -term
+					else if (ParserRules.IsMinusChar(symbolToken.Symbol))
+					{
+						return new UnaryOperationTreeNode(UnaryOperation.Negative, ParseTermWithPossibleFactorial(context));
+					}
+					// +term
+					else if (ParserRules.IsPlusChar(symbolToken.Symbol))
+					{
+						return ParseTermWithPossibleFactorial(context);
+					}
+					throw new Exception(String.Format("Unexpected symbol token when parsing term: '{0}'", symbolToken.Symbol));
+				}
+
+				case IdentifierToken identifierToken:
+				{
+					// variable
+					if (!context.TryGetNextToken(out Token nextToken))
+					{
+						return new VariableTreeNode(identifierToken.Identifier);
+					}
+					else if (nextToken as SymbolToken == null || !ParserRules.IsLeftBracketChar(((SymbolToken)nextToken).Symbol))
+					{
+						context.PutBackToken();
+						return new VariableTreeNode(identifierToken.Identifier);
+					}
+
+					// if we are here, then it's a function
+
+					// check if it has any parameters
+					// func()
+					if (context.TryPeekNextToken(out Token emptyFuncToken) && 
+						emptyFuncToken as SymbolToken != null &&
+						ParserRules.IsRightBracketChar(((SymbolToken)emptyFuncToken).Symbol))
+					{
+						context.EatLastToken(); // eat right brackets
+						return new FunctionTreeNode(identifierToken.Identifier, new ExpressionTreeNode[0]);
+					}
+
+					// parse each parameter
+					// func(expression, ...)
+					List<ExpressionTreeNode> parameters = new List<ExpressionTreeNode>();
+					while (true)
+					{
+						ExpressionTreeNode parameter = ParseExpression(context, ',', ')');
+						parameters.Add(parameter);
+
+						if (context.TryGetNextToken(out Token delimToken) && delimToken as SymbolToken != null)
+						{
+							if (ParserRules.IsCommaChar(((SymbolToken)delimToken).Symbol)) continue;
+							if (ParserRules.IsRightBracketChar(((SymbolToken)delimToken).Symbol)) break;
+							throw new Exception(String.Format("Can't parse function (unknown delimeter token '{0}')", delimToken));
+						}
+						// if we're here, then something is wrong
+						throw new Exception(String.Format("Can't parse function (no delimeter token)"));
+					}
+					
+					return new FunctionTreeNode(identifierToken.Identifier, parameters.ToArray());
+				}
+
+				// literal
+				case LiteralToken literalToken:
+				{
+					return new LiteralTreeNode(literalToken.Value);
+				}
+			}
+
+			throw new Exception(String.Format("Unknown token type: '{0}'", token));
+		}
+
+		// stupid factorial. Why should it be after term, not before it?
+		ExpressionTreeNode ParseTermWithPossibleFactorial(ConstructionContext context)
+		{
+			ExpressionTreeNode term = ParseTerm(context);
+
+			while (context.TryPeekNextToken(out Token factorialToken) &&
+				factorialToken as SymbolToken != null &&
+				ParserRules.IsFactorialChar(((SymbolToken)factorialToken).Symbol))
+			{
+				context.TryGetNextToken(out factorialToken); // eat factorial token
+
+				term = new UnaryOperationTreeNode(UnaryOperation.Factorial, term);
+			}
+
+			return term;
+		}
+
+		void PopOperatorAndPushResult(Stack<ExpressionTreeNode> termStack, Stack<char> operatorStack)
+		{
+			BinaryOperation operation = OperatorRules.CharToBinaryOperator(operatorStack.Pop());
+			// note: operators are in the reverse order because stack.
+			ExpressionTreeNode rightChild = termStack.Pop();
+			ExpressionTreeNode leftChild = termStack.Pop();
+			termStack.Push(new BinaryOperationTreeNode(operation, leftChild, rightChild));
+		}
+
+		// expression is parsed using Dijkstra's shunting-yard algorithm.
+		ExpressionTreeNode ParseExpression(ConstructionContext context, params char[] stopSymbols)
+		{
+			Stack<ExpressionTreeNode> termStack = new Stack<ExpressionTreeNode>();
+			Stack<char> operatorStack = new Stack<char>();
+			termStack.Push(ParseTermWithPossibleFactorial(context)); // expression should have at least one term
+
+			// then there should be exactly one binary operator and one term every iteration
+			while (context.TryPeekNextToken(out Token token))
+			{
+				if (token is SymbolToken symbolToken)
+				{
+					if (ParserRules.IsBinaryOperatorChar(symbolToken.Symbol))
+					{
+						context.EatLastToken(); // eat binary operator
+
+						char curOperator = symbolToken.Symbol;
+						while (operatorStack.Count > 0)
+						{
+							char topOperator = operatorStack.Peek();
+							if ((OperatorRules.GetOperatorPriority(topOperator) > OperatorRules.GetOperatorPriority(curOperator)) ||
+								((OperatorRules.GetOperatorPriority(topOperator) == OperatorRules.GetOperatorPriority(curOperator)) &&
+								OperatorRules.IsOperatorLeftAssociative(curOperator)))
+							{
+								PopOperatorAndPushResult(termStack, operatorStack);
+							}
+							else break;
+						}
+						operatorStack.Push(curOperator);
+
+						termStack.Push(ParseTermWithPossibleFactorial(context));
+						continue;
+					}
+					else if (stopSymbols.Contains(symbolToken.Symbol))
+					{
+						while (operatorStack.Count > 0)
+						{
+							PopOperatorAndPushResult(termStack, operatorStack);
+						}
+						return termStack.Pop();
+					}
+				}
+				throw new Exception(String.Format("Unexpected token: '{0}', expected binary operator or stop-symbol", token));
+			}
+
+			if (stopSymbols.Length > 0) throw new Exception(String.Format("Unfinished expression: expected stop symbol '{0}'", stopSymbols[0]));
+
+			while (operatorStack.Count > 0)
+			{
+				PopOperatorAndPushResult(termStack, operatorStack);
+			}
+			return termStack.Pop();
+		}
+
+		public ExpressionTreeNode Construct(Token[] tokens)
+		{
+			return ParseExpression(new ConstructionContext(tokens));
+		}
+	}
+}
