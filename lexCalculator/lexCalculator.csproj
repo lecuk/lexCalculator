@@ -58,6 +58,8 @@
     <Compile Include="Parsing\Token.cs" />
     <Compile Include="Parsing\ParserRules.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="grammar.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

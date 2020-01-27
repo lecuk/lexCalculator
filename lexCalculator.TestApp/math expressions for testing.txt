@@ -1,0 +1,11 @@
+2 + 2
+a*x^2 + b*x + c
+sin(x)
+h*cos(x^3*pi/2.0)
+x^2^2^2
+1*2*3*4*5/5!
+a / (b * c) + d / e * f(x, y, z)
+(2.04*x^3 - sin(y*pi) + x! / exp(y)) / userfunc(a, floor(b), c)
+a ^ b * c - d + e
+3 / 3 / 5
+a - 1 - 2 - 3 - 4

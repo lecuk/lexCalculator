@@ -51,5 +51,8 @@
       <Name>lexCalculator</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="math expressions for testing.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
