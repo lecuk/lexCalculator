@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using lexCalculator.Parsing;
+using lexCalculator.Types;
 
-namespace lexCalculator.Construction
+namespace lexCalculator.Parsing
 {
 	// it's a horrible class, but is's "Shitty" after all :D
 	public class ShittyExpressionConstructor : IExpressionConstructor
@@ -98,7 +98,7 @@ namespace lexCalculator.Construction
 							parentnesisEndSymbolToken.Symbol == '|')
 						{
 							context.EatLastToken(); // eat right brackets
-							return new UnaryOperationTreeNode(UnaryOperation.Absolute, node);
+							return new UnaryOperationTreeNode(UnaryOperation.AbsoluteValue, node);
 						}
 						throw new Exception("Mismatched brackets");
 					}
@@ -162,7 +162,7 @@ namespace lexCalculator.Construction
 				}
 
 				// literal
-				case LiteralToken literalToken:
+				case NumberToken literalToken:
 				{
 					return new LiteralTreeNode(literalToken.Value);
 				}
@@ -254,7 +254,9 @@ namespace lexCalculator.Construction
 
 		public ExpressionTreeNode Construct(Token[] tokens)
 		{
-			return ParseExpression(new ConstructionContext(tokens));
+			ExpressionTreeNode unfinishedTree = ParseExpression(new ConstructionContext(tokens));
+
+			return unfinishedTree;
 		}
 	}
 }

@@ -41,16 +41,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Construction\CalculatorContext.cs" />
-    <Compile Include="Calculation\VariableIndexTable.cs" />
-    <Compile Include="Linking\Expression.cs" />
-    <Compile Include="Construction\ExpressionTreeNode.cs" />
-    <Compile Include="Construction\Function.cs" />
-    <Compile Include="Construction\IExpressionConstructor.cs" />
-    <Compile Include="Construction\Operation.cs" />
-    <Compile Include="Construction\OperatorRules.cs" />
-    <Compile Include="Construction\ShittyExpressionConstructor.cs" />
-    <Compile Include="Linking\ILinker.cs" />
+    <Compile Include="Calculation\ICalculator.cs" />
+    <Compile Include="Linking\IConvertor.cs" />
+    <Compile Include="Calculation\ShittyCalculator.cs" />
+    <Compile Include="Linking\ShittyConvertor.cs" />
+    <Compile Include="Types\ByteExpression.cs" />
+    <Compile Include="Linking\ShittyLinker.cs" />
+    <Compile Include="Linking\StandardLibrary.cs" />
+    <Compile Include="Linking\StandardVariables.cs" />
+    <Compile Include="Types\ExpressionContext.cs" />
+    <Compile Include="Types\VariableIndexTable.cs" />
+    <Compile Include="Types\Expression.cs" />
+    <Compile Include="Types\ExpressionTreeNode.cs" />
+    <Compile Include="Types\Function.cs" />
+    <Compile Include="Parsing\IExpressionConstructor.cs" />
+    <Compile Include="Types\Operation.cs" />
+    <Compile Include="Parsing\OperatorRules.cs" />
+    <Compile Include="Parsing\ShittyExpressionConstructor.cs" />
+    <Compile Include="Linking\IFunctionBuilder.cs" />
     <Compile Include="Linking\StandardFunctions.cs" />
     <Compile Include="Parsing\ITokenizer.cs" />
     <Compile Include="Parsing\ShittyTokenizer.cs" />
@@ -61,5 +69,6 @@
   <ItemGroup>
     <Content Include="grammar.txt" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

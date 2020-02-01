@@ -1,6 +1,6 @@
-﻿using lexCalculator.Parsing;
+﻿using lexCalculator.Types;
 
-namespace lexCalculator.Construction
+namespace lexCalculator.Parsing
 {
 	public interface IExpressionConstructor
 	{

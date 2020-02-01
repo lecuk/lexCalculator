@@ -55,12 +55,12 @@ namespace lexCalculator.Parsing
 
 		public static bool IsValidIdentifierFirstChar(char symbol)
 		{
-			return (Char.IsLetter(symbol) || symbol == '_' || symbol == '#');
+			return (Char.IsLetter(symbol) || symbol == '_');
 		}
 
 		public static bool IsValidIdentifierChar(char symbol)
 		{
-			return (Char.IsLetterOrDigit(symbol) || symbol == '_' || symbol == '#');
+			return (Char.IsLetterOrDigit(symbol) || symbol == '_');
 		}
 
 		public static bool IsValidSymbolChar(char symbol)

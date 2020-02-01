@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace lexCalculator.Parsing
+﻿namespace lexCalculator.Parsing
 {
 	public abstract class Token
 	{
@@ -40,11 +38,11 @@ namespace lexCalculator.Parsing
 		}
 	}
 
-	public class LiteralToken : Token
+	public class NumberToken : Token
 	{
 		public double Value { get; set; }
 
-		public LiteralToken(double value)
+		public NumberToken(double value)
 		{
 			Value = value;
 		}

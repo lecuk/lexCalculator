@@ -1,4 +1,4 @@
-﻿using lexCalculator.Construction;
+﻿using lexCalculator.Types;
 using System;
 
 namespace lexCalculator.TestApp
@@ -8,10 +8,25 @@ namespace lexCalculator.TestApp
 		readonly string[] UnaryToString = new string[]
 		{
 			"-",
+			"sign",
 			"sin",
 			"cos",
 			"tan",
 			"cot",
+			"sec",
+			"csc",
+			"arcsin",
+			"arccos",
+			"arctan",
+			"arccot",
+			"arcsec",
+			"arccsc",
+			"sinh",
+			"cosh",
+			"tanh",
+			"coth",
+			"sech",
+			"csch",
 			"exp",
 			"ln",
 			"sqrt",
@@ -60,7 +75,23 @@ namespace lexCalculator.TestApp
 					Console.ResetColor();
 					break;
 				}
-				
+
+				case FunctionParameterTreeNode fpTreeNode:
+				{
+					Console.ForegroundColor = ConsoleColor.DarkGreen;
+					Console.WriteLine(fpTreeNode);
+					Console.ResetColor();
+					break;
+				}
+
+				case IndexTreeNode iTreeNode:
+				{
+					Console.ForegroundColor = ConsoleColor.White;
+					Console.WriteLine(iTreeNode);
+					Console.ResetColor();
+					break;
+				}
+
 				case FunctionTreeNode fTreeNode:
 				{
 					Console.ForegroundColor = ConsoleColor.Magenta;
@@ -108,13 +139,25 @@ namespace lexCalculator.TestApp
 			{
 				case LiteralTreeNode lTreeNode:
 				{
-					Console.Write(lTreeNode.Value.ToString("0.####", System.Globalization.CultureInfo.InvariantCulture));
+					Console.Write(lTreeNode);
 					break;
 				}
 
 				case VariableTreeNode vTreeNode:
 				{
-					Console.Write(vTreeNode.Name);
+					Console.Write(vTreeNode);
+					break;
+				}
+
+				case FunctionParameterTreeNode fpTreeNode:
+				{
+					Console.Write(fpTreeNode);
+					break;
+				}
+
+				case IndexTreeNode iTreeNode:
+				{
+					Console.Write(iTreeNode);
 					break;
 				}
 
@@ -139,6 +182,12 @@ namespace lexCalculator.TestApp
 						Console.Write("(");
 						VisualizeAsNormalEquation(uTreeNode.Child);
 						Console.Write(")!");
+					}
+					else if(uTreeNode.Operation == UnaryOperation.AbsoluteValue)
+					{
+						Console.Write("|");
+						VisualizeAsNormalEquation(uTreeNode.Child);
+						Console.Write("|");
 					}
 					else
 					{
@@ -189,6 +238,20 @@ namespace lexCalculator.TestApp
 					break;
 				}
 
+				case FunctionParameterTreeNode fpTreeNode:
+				{
+					Console.Write(fpTreeNode);
+					Console.Write(' ');
+					break;
+				}
+
+				case IndexTreeNode iTreeNode:
+				{
+					Console.Write(iTreeNode);
+					Console.Write(' ');
+					break;
+				}
+
 				case FunctionTreeNode fTreeNode:
 				{
 					Console.Write(fTreeNode.Name);
@@ -233,6 +296,20 @@ namespace lexCalculator.TestApp
 				case VariableTreeNode vTreeNode:
 				{
 					Console.Write(vTreeNode.Name);
+					Console.Write(' ');
+					break;
+				}
+
+				case FunctionParameterTreeNode fpTreeNode:
+				{
+					Console.Write(fpTreeNode);
+					Console.Write(' ');
+					break;
+				}
+
+				case IndexTreeNode iTreeNode:
+				{
+					Console.Write(iTreeNode);
 					Console.Write(' ');
 					break;
 				}

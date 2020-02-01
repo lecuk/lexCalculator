@@ -1,7 +1,7 @@
 ﻿using System;
-using lexCalculator.Parsing;
+using lexCalculator.Types;
 
-namespace lexCalculator.Construction
+namespace lexCalculator.Parsing
 {
 	static class OperatorRules
 	{

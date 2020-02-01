@@ -43,7 +43,7 @@ namespace lexCalculator.Parsing
 				throw new ArgumentException(String.Format("Unexpected character in number token: \"{0}\"", symbol));
 			}
 
-			return new LiteralToken(Double.Parse(literalBuilder.ToString(), System.Globalization.NumberStyles.AllowExponent | System.Globalization.NumberStyles.AllowDecimalPoint, System.Globalization.CultureInfo.InvariantCulture));
+			return new NumberToken(Double.Parse(literalBuilder.ToString(), System.Globalization.NumberStyles.AllowExponent | System.Globalization.NumberStyles.AllowDecimalPoint, System.Globalization.CultureInfo.InvariantCulture));
 		}
 
 		Token GetIdentifier(StringReader reader)
