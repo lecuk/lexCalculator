@@ -38,7 +38,7 @@ namespace lexCalculator.Linking
 			{ "cbrt", UnaryOperation.CubeRoot },
 
 			{ "floor", UnaryOperation.Floor },
-			{ "ceil", UnaryOperation.Ceil }
+			{ "ceil", UnaryOperation.Ceiling }
 		};
 
 		public static IReadOnlyDictionary<string, BinaryOperation> BinaryFunctions = new Dictionary<string, BinaryOperation>()

@@ -3,14 +3,14 @@ using System.Collections.Generic;
 
 namespace lexCalculator.Types
 {
-	public class ExpressionContext
+	public class CalculationContext
 	{
-		public readonly VariableIndexTable VariableTable;
+		public readonly VariableTable VariableTable;
 
-		readonly Dictionary<string, Function> functionTable;
-		public IReadOnlyDictionary<string, Function> FunctionTable => functionTable;
+		readonly Dictionary<string, FinishedFunction> functionTable;
+		public IReadOnlyDictionary<string, FinishedFunction> FunctionTable => functionTable;
 
-		public void AssignFunction(string name, Function function)
+		public void AssignFunction(string name, FinishedFunction function)
 		{
 			if (functionTable.ContainsKey(name))
 			{
@@ -27,28 +27,28 @@ namespace lexCalculator.Types
 			if (!functionTable.ContainsKey(name)) throw new ArgumentException(String.Format("Function \"{0}\" is not defined", name));
 			if (functionTable.ContainsKey(newName)) throw new ArgumentException(String.Format("Function \"{0}\" is already defined", newName));
 
-			Function function = functionTable[name];
+			FinishedFunction function = functionTable[name];
 			functionTable.Remove(name);
 			AssignFunction(newName, function);
 		}
 
-		public void AssignContext(ExpressionContext anotherContext)
+		public void AssignContext(CalculationContext anotherContext)
 		{
 			foreach (KeyValuePair<string, int> pair in anotherContext.VariableTable.Indexes)
 			{
 				VariableTable.AssignVariable(pair.Key, anotherContext.VariableTable[pair.Value]);
 			}
 
-			foreach (KeyValuePair<string, Function> pair in anotherContext.FunctionTable)
+			foreach (KeyValuePair<string, FinishedFunction> pair in anotherContext.FunctionTable)
 			{
 				AssignFunction(pair.Key, pair.Value);
 			}
 		}
 
-		public ExpressionContext()
+		public CalculationContext()
 		{
-			VariableTable = new VariableIndexTable();
-			functionTable = new Dictionary<string, Function>();
+			VariableTable = new VariableTable();
+			functionTable = new Dictionary<string, FinishedFunction>();
 		}
 	}
 }

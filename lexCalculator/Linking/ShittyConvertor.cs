@@ -5,9 +5,9 @@ using System.IO;
 
 namespace lexCalculator.Linking
 {
-	public class ShittyConvertor : IConvertor<ByteExpression>
+	public class ShittyConvertor : IConvertor<PostfixFunction>
 	{
-		void ConvertRecursion(ExpressionTreeNode node, MemoryStream stream)
+		void ConvertRecursion(TreeNode node, MemoryStream stream)
 		{
 			switch (node)
 			{
@@ -23,21 +23,21 @@ namespace lexCalculator.Linking
 
 				case LiteralTreeNode lNode:
 				{
-					stream.WriteByte((byte)ByteExpression.CodeCommand.PushLiteral);
+					stream.WriteByte((byte)PostfixFunction.CodeCommand.PushLiteral);
 					stream.Write(BitConverter.GetBytes(lNode.Value), 0, sizeof(double));
 				}
 				break;
 
 				case FunctionParameterTreeNode fpNode:
 				{
-					stream.WriteByte((byte)ByteExpression.CodeCommand.PushParameter);
+					stream.WriteByte((byte)PostfixFunction.CodeCommand.PushParameter);
 					stream.Write(BitConverter.GetBytes(fpNode.Index), 0, sizeof(int));
 				}
 				break;
 
 				case IndexTreeNode iNode:
 				{
-					stream.WriteByte((byte)ByteExpression.CodeCommand.PushVariable);
+					stream.WriteByte((byte)PostfixFunction.CodeCommand.PushVariable);
 					stream.Write(BitConverter.GetBytes(iNode.Index), 0, sizeof(int));
 				}
 				break;
@@ -46,7 +46,7 @@ namespace lexCalculator.Linking
 				{
 					ConvertRecursion(uNode.Child, stream);
 
-					stream.WriteByte((byte)ByteExpression.CodeCommand.CalculateUnary);
+					stream.WriteByte((byte)PostfixFunction.CodeCommand.CalculateUnary);
 					stream.Write(BitConverter.GetBytes((int)uNode.Operation), 0, sizeof(int));
 				}
 				break;
@@ -57,22 +57,22 @@ namespace lexCalculator.Linking
 					ConvertRecursion(bNode.LeftChild, stream);
 					ConvertRecursion(bNode.RightChild, stream);
 
-					stream.WriteByte((byte)ByteExpression.CodeCommand.CalculateBinary);
+					stream.WriteByte((byte)PostfixFunction.CodeCommand.CalculateBinary);
 					stream.Write(BitConverter.GetBytes((int)bNode.Operation), 0, sizeof(int));
 				}
 				break;
 			}
 		}
 
-		public ByteExpression Convert(Function function)
+		public PostfixFunction Convert(FinishedFunction function)
 		{
 			MemoryStream stream = new MemoryStream();
 
 			ConvertRecursion(function.TopNode, stream);
 
-			stream.WriteByte((byte)ByteExpression.CodeCommand.End);
+			stream.WriteByte((byte)PostfixFunction.CodeCommand.End);
 
-			return new ByteExpression(stream.GetBuffer());
+			return new PostfixFunction(stream.GetBuffer(), function);
 		}
 	}
 }

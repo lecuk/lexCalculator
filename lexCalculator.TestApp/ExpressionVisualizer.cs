@@ -49,7 +49,7 @@ namespace lexCalculator.TestApp
 			"nrt"
 		};
 
-		public void VisualizeAsTree(ExpressionTreeNode node, string colorStr)
+		public void VisualizeAsTree(TreeNode node, string colorStr)
 		{
 			for (int i = 0; i < colorStr.Length; ++i)
 			{
@@ -97,7 +97,7 @@ namespace lexCalculator.TestApp
 					Console.ForegroundColor = ConsoleColor.Magenta;
 					Console.WriteLine(String.Format("{0}()", fTreeNode.Name));
 					Console.ResetColor();
-					foreach (ExpressionTreeNode child in fTreeNode.Parameters)
+					foreach (TreeNode child in fTreeNode.Parameters)
 					{
 						VisualizeAsTree(child, colorStr + '0');
 					}
@@ -133,100 +133,13 @@ namespace lexCalculator.TestApp
 			*/
 		}
 
-		public void VisualizeAsNormalEquation(ExpressionTreeNode node)
+		public void VisualizeAsPrefixEquation(TreeNode node)
 		{
 			switch (node)
 			{
 				case LiteralTreeNode lTreeNode:
 				{
-					Console.Write(lTreeNode);
-					break;
-				}
-
-				case VariableTreeNode vTreeNode:
-				{
-					Console.Write(vTreeNode);
-					break;
-				}
-
-				case FunctionParameterTreeNode fpTreeNode:
-				{
-					Console.Write(fpTreeNode);
-					break;
-				}
-
-				case IndexTreeNode iTreeNode:
-				{
-					Console.Write(iTreeNode);
-					break;
-				}
-
-				case FunctionTreeNode fTreeNode:
-				{
-					Console.Write(fTreeNode.Name);
-					Console.Write('(');
-					if (fTreeNode.Parameters.Length > 0) VisualizeAsNormalEquation(fTreeNode.Parameters[0]);
-					for (int i = 1; i < fTreeNode.Parameters.Length; ++i)
-					{
-						Console.Write(", ");
-						VisualizeAsNormalEquation(fTreeNode.Parameters[i]);
-					}
-					Console.Write(")");
-					break;
-				}
-
-				case UnaryOperationTreeNode uTreeNode:
-				{
-					if (uTreeNode.Operation == UnaryOperation.Factorial)
-					{
-						Console.Write("(");
-						VisualizeAsNormalEquation(uTreeNode.Child);
-						Console.Write(")!");
-					}
-					else if(uTreeNode.Operation == UnaryOperation.AbsoluteValue)
-					{
-						Console.Write("|");
-						VisualizeAsNormalEquation(uTreeNode.Child);
-						Console.Write("|");
-					}
-					else
-					{
-						Console.Write(String.Format("{0}(", UnaryToString[(int)uTreeNode.Operation]));
-						VisualizeAsNormalEquation(uTreeNode.Child);
-						Console.Write(")");
-					}
-					break;
-				}
-
-				case BinaryOperationTreeNode bTreeNode:
-				{
-					if (bTreeNode.Operation == BinaryOperation.Logarithm || bTreeNode.Operation == BinaryOperation.NRoot)
-					{
-						Console.Write(BinaryToString[(int)bTreeNode.Operation]);
-						Console.Write('(');
-						VisualizeAsNormalEquation(bTreeNode.LeftChild);
-						Console.Write(", ");
-						VisualizeAsNormalEquation(bTreeNode.RightChild);
-						Console.Write(")");
-					}
-					else
-					{
-						VisualizeAsNormalEquation(bTreeNode.LeftChild);
-						Console.Write(String.Format(" {0} ", BinaryToString[(int)bTreeNode.Operation]));
-						VisualizeAsNormalEquation(bTreeNode.RightChild);
-					}
-					break;
-				}
-			}
-		}
-
-		public void VisualizeAsPrefixEquation(ExpressionTreeNode node)
-		{
-			switch (node)
-			{
-				case LiteralTreeNode lTreeNode:
-				{
-					Console.Write(lTreeNode.Value.ToString("0.####", System.Globalization.CultureInfo.InvariantCulture));
+					Console.Write(lTreeNode.Value.ToString("G6", System.Globalization.CultureInfo.InvariantCulture));
 					Console.Write(' ');
 					break;
 				}
@@ -256,7 +169,7 @@ namespace lexCalculator.TestApp
 				{
 					Console.Write(fTreeNode.Name);
 					Console.Write(' ');
-					foreach (ExpressionTreeNode child in fTreeNode.Parameters)
+					foreach (TreeNode child in fTreeNode.Parameters)
 					{
 						VisualizeAsPrefixEquation(child);
 					}
@@ -282,7 +195,7 @@ namespace lexCalculator.TestApp
 			}
 		}
 
-		public void VisualizeAsPostfixEquation(ExpressionTreeNode node)
+		public void VisualizeAsPostfixEquation(TreeNode node)
 		{
 			switch (node)
 			{
@@ -316,7 +229,7 @@ namespace lexCalculator.TestApp
 
 				case FunctionTreeNode fTreeNode:
 				{
-					foreach (ExpressionTreeNode child in fTreeNode.Parameters)
+					foreach (TreeNode child in fTreeNode.Parameters)
 					{
 						VisualizeAsPostfixEquation(child);
 					}

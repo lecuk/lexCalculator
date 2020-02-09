@@ -34,7 +34,7 @@
 		CubeRoot,				// cbrt(a)
 
 		Floor,					// floor(a)
-		Ceil,					// ceil(a)
+		Ceiling,				// ceil(a)
 		AbsoluteValue,			// abs(a) == |a|
 
 		Factorial				// a!
@@ -55,7 +55,7 @@
 		NRoot,					// nrt(a, n)
 	}
 
-	// Represents a function with variable number of arguments or list as single argument.
+	// Represents a function with variable number of arguments or list as single argument. (Not yet implemented)
 	public enum ListOperation
 	{
 		Max,					// max(a1, a2, ...)

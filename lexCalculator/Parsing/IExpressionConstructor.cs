@@ -4,6 +4,6 @@ namespace lexCalculator.Parsing
 {
 	public interface IExpressionConstructor
 	{
-		ExpressionTreeNode Construct(Token[] tokens);
+		TreeNode Construct(Token[] tokens);
 	}
 }

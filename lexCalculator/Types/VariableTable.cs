@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace lexCalculator.Types
 {
-	public class VariableIndexTable
+	public class VariableTable
 	{
 		public const int DEFAULT_TABLE_SIZE = 1024; // i think 1024 unique variables is enough
 
@@ -51,7 +51,7 @@ namespace lexCalculator.Types
 			}
 		}
 
-		public VariableIndexTable(int tableSize = DEFAULT_TABLE_SIZE)
+		public VariableTable(int tableSize = DEFAULT_TABLE_SIZE)
 		{
 			values = new double[tableSize];
 			curIndex = 0;

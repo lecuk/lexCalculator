@@ -1,8 +1,9 @@
-﻿using System.IO;
+﻿using lexCalculator.Calculation;
+using System.IO;
 
 namespace lexCalculator.Types
 {
-	public class ByteExpression
+	public class PostfixFunction
 	{
 		public enum CodeCommand
 		{
@@ -10,15 +11,17 @@ namespace lexCalculator.Types
 		}
 
 		private readonly byte[] Code;
+		public readonly FinishedFunction OriginalFunction;
 
 		public MemoryStream GetStream()
 		{
 			return new MemoryStream(Code, false);
 		}
 
-		public ByteExpression(byte[] code)
+		public PostfixFunction(byte[] code, FinishedFunction originalFunction)
 		{
 			Code = (byte[])code.Clone();
+			OriginalFunction = originalFunction;
 		}
 	}
 }

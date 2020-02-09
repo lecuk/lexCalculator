@@ -4,9 +4,10 @@ using lexCalculator.Types;
 
 namespace lexCalculator.Linking
 {
-	public class ShittyLinker : IFunctionBuilder
+	// It rebuilds trees in a way that unfinished tree nodes and variable nodes are replaced with
+	public class ShittyLinker : ILinker
 	{
-		ExpressionTreeNode InsertFunction(FunctionTreeNode fTree, string functionName, Function function)
+		TreeNode InsertFunction(FunctionTreeNode fTree, string functionName, FinishedFunction function)
 		{
 			// so, what do we do here. We search for functions with our name and "insert" copy of function tree in or original tree.
 			// Also, we replace all parameters with trees specified in original tree
@@ -14,10 +15,10 @@ namespace lexCalculator.Linking
 				throw new Exception(String.Format("Invalid parameter count in \"{0}\" call (expected {1}, actual {2})",
 					fTree.Name, function.ParameterCount, fTree.Parameters.Length));
 
-			ExpressionTreeNode parent = fTree.Parent;
-			ExpressionTreeNode[] parameters = fTree.Parameters;
+			TreeNode parent = fTree.Parent;
+			TreeNode[] parameters = fTree.Parameters;
 
-			ExpressionTreeNode newTree = function.TopNode.Clone();
+			TreeNode newTree = function.TopNode.Clone();
 			for (int i = 0; i < fTree.Parameters.Length; ++i)
 			{
 				newTree = ReplaceParameterWithTreeNode(newTree, i, parameters[i]);
@@ -27,7 +28,7 @@ namespace lexCalculator.Linking
 			return newTree;
 		}
 
-		ExpressionTreeNode LinkTree(ExpressionTreeNode tree, ExpressionContext context, string[] parameterNames)
+		TreeNode LinkTree(TreeNode tree, CalculationContext context, string[] parameterNames)
 		{
 			switch (tree)
 			{
@@ -75,13 +76,13 @@ namespace lexCalculator.Linking
 			return tree;
 		}
 
-		ExpressionTreeNode ReplaceParameterWithTreeNode(ExpressionTreeNode tree, int index, ExpressionTreeNode replacement)
+		TreeNode ReplaceParameterWithTreeNode(TreeNode tree, int index, TreeNode replacement)
 		{
 			if (tree is FunctionParameterTreeNode iTree)
 			{
 				if (iTree.Index == index)
 				{
-					ExpressionTreeNode parent = tree.Parent;
+					TreeNode parent = tree.Parent;
 					tree = replacement;
 					tree.Parent = parent;
 					return tree;
@@ -114,11 +115,11 @@ namespace lexCalculator.Linking
 			return tree;
 		}
 		
-		public Function BuildFunction(ExpressionTreeNode tree, ExpressionContext context, string[] parameterNames)
+		public FinishedFunction BuildFunction(TreeNode tree, CalculationContext context, string[] parameterNames)
 		{
-			ExpressionTreeNode treeClone = tree.Clone();
+			TreeNode treeClone = tree.Clone();
 			
-			return new Function(LinkTree(treeClone, context, parameterNames), parameterNames.Length);
+			return new FinishedFunction(LinkTree(treeClone, context, parameterNames), context.VariableTable, parameterNames.Length);
 		}
 	}
 }

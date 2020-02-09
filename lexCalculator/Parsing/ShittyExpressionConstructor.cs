@@ -65,7 +65,7 @@ namespace lexCalculator.Parsing
 			}
 		}
 
-		ExpressionTreeNode ParseTerm(ConstructionContext context)
+		TreeNode ParseTerm(ConstructionContext context)
 		{
 			if (!context.TryGetNextToken(out Token token))
 			{
@@ -79,7 +79,7 @@ namespace lexCalculator.Parsing
 					// (expression)
 					if (symbolToken.Symbol == '(')
 					{
-						ExpressionTreeNode node = ParseExpression(context, ')');
+						TreeNode node = ParseExpression(context, ')');
 						if (context.TryPeekNextToken(out Token parentnesisEndToken) &&
 						parentnesisEndToken is SymbolToken parentnesisEndSymbolToken &&
 						parentnesisEndSymbolToken.Symbol == ')')
@@ -92,7 +92,7 @@ namespace lexCalculator.Parsing
 					// |expression|
 					else if (symbolToken.Symbol == '|')
 					{
-						ExpressionTreeNode node = ParseExpression(context, '|');
+						TreeNode node = ParseExpression(context, '|');
 						if (context.TryPeekNextToken(out Token parentnesisEndToken) && 
 							parentnesisEndToken is SymbolToken parentnesisEndSymbolToken &&
 							parentnesisEndSymbolToken.Symbol == '|')
@@ -137,15 +137,15 @@ namespace lexCalculator.Parsing
 						emptyFuncSymbolToken.Symbol == ')')
 					{
 						context.EatLastToken(); // eat right brackets
-						return new FunctionTreeNode(identifierToken.Identifier, new ExpressionTreeNode[0]);
+						return new FunctionTreeNode(identifierToken.Identifier, new TreeNode[0]);
 					}
 
 					// parse each parameter
 					// func(expression, ...)
-					List<ExpressionTreeNode> parameters = new List<ExpressionTreeNode>();
+					List<TreeNode> parameters = new List<TreeNode>();
 					while (true)
 					{
-						ExpressionTreeNode parameter = ParseExpression(context, ',', ')');
+						TreeNode parameter = ParseExpression(context, ',', ')');
 						parameters.Add(parameter);
 
 						if (context.TryGetNextToken(out Token delimToken) && delimToken is SymbolToken delimSymbolToken)
@@ -172,9 +172,9 @@ namespace lexCalculator.Parsing
 		}
 
 		// stupid factorial. Why should it be after term, not before it?
-		ExpressionTreeNode ParseTermWithPossibleFactorial(ConstructionContext context)
+		TreeNode ParseTermWithPossibleFactorial(ConstructionContext context)
 		{
-			ExpressionTreeNode term = ParseTerm(context);
+			TreeNode term = ParseTerm(context);
 
 			while (context.TryPeekNextToken(out Token factorialToken) &&
 				factorialToken is SymbolToken factorialSymbolToken &&
@@ -188,20 +188,20 @@ namespace lexCalculator.Parsing
 			return term;
 		}
 
-		void PopOperatorAndPushResult(Stack<ExpressionTreeNode> termStack, Stack<char> operatorStack)
+		void PopOperatorAndPushResult(Stack<TreeNode> termStack, Stack<char> operatorStack)
 		{
 			BinaryOperation operation = OperatorRules.CharToBinaryOperator(operatorStack.Pop());
 			// note: operators are popped in the reverse order because stack.
-			ExpressionTreeNode rightChild = termStack.Pop();
-			ExpressionTreeNode leftChild = termStack.Pop();
-			ExpressionTreeNode result = new BinaryOperationTreeNode(operation, leftChild, rightChild);
+			TreeNode rightChild = termStack.Pop();
+			TreeNode leftChild = termStack.Pop();
+			TreeNode result = new BinaryOperationTreeNode(operation, leftChild, rightChild);
 			termStack.Push(result);
 		}
 
 		// expression is parsed using Dijkstra's shunting-yard algorithm.
-		ExpressionTreeNode ParseExpression(ConstructionContext context, params char[] stopSymbols)
+		TreeNode ParseExpression(ConstructionContext context, params char[] stopSymbols)
 		{
-			Stack<ExpressionTreeNode> termStack = new Stack<ExpressionTreeNode>();
+			Stack<TreeNode> termStack = new Stack<TreeNode>();
 			Stack<char> operatorStack = new Stack<char>();
 			termStack.Push(ParseTermWithPossibleFactorial(context)); // expression should have at least one term
 
@@ -252,9 +252,9 @@ namespace lexCalculator.Parsing
 			return termStack.Pop();
 		}
 
-		public ExpressionTreeNode Construct(Token[] tokens)
+		public TreeNode Construct(Token[] tokens)
 		{
-			ExpressionTreeNode unfinishedTree = ParseExpression(new ConstructionContext(tokens));
+			TreeNode unfinishedTree = ParseExpression(new ConstructionContext(tokens));
 
 			return unfinishedTree;
 		}

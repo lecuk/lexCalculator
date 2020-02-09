@@ -16,7 +16,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
+    <Optimize>true</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -32,33 +32,32 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Calculation\BasicOperations.cs" />
+    <Compile Include="Calculation\TreeCalculator.cs" />
     <Compile Include="Calculation\ICalculator.cs" />
+    <Compile Include="Calculation\MoreMath.cs" />
+    <Compile Include="Calculation\PostfixCalculator.cs" />
     <Compile Include="Linking\IConvertor.cs" />
-    <Compile Include="Calculation\ShittyCalculator.cs" />
     <Compile Include="Linking\ShittyConvertor.cs" />
-    <Compile Include="Types\ByteExpression.cs" />
+    <Compile Include="Types\PostfixFunction.cs" />
     <Compile Include="Linking\ShittyLinker.cs" />
     <Compile Include="Linking\StandardLibrary.cs" />
     <Compile Include="Linking\StandardVariables.cs" />
-    <Compile Include="Types\ExpressionContext.cs" />
-    <Compile Include="Types\VariableIndexTable.cs" />
-    <Compile Include="Types\Expression.cs" />
-    <Compile Include="Types\ExpressionTreeNode.cs" />
-    <Compile Include="Types\Function.cs" />
+    <Compile Include="Types\CalculationContext.cs" />
+    <Compile Include="Types\VariableTable.cs" />
+    <Compile Include="Types\TreeNode.cs" />
+    <Compile Include="Types\FinishedFunction.cs" />
     <Compile Include="Parsing\IExpressionConstructor.cs" />
     <Compile Include="Types\Operation.cs" />
     <Compile Include="Parsing\OperatorRules.cs" />
     <Compile Include="Parsing\ShittyExpressionConstructor.cs" />
-    <Compile Include="Linking\IFunctionBuilder.cs" />
+    <Compile Include="Linking\ILinker.cs" />
     <Compile Include="Linking\StandardFunctions.cs" />
     <Compile Include="Parsing\ITokenizer.cs" />
     <Compile Include="Parsing\ShittyTokenizer.cs" />
