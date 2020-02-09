@@ -16,12 +16,6 @@ namespace lexCalculator.Calculation
 			return (double)Math.Sign(x);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static double Sign2(double x)
-		{
-			return (x > 0) ? 1.0 : (x < 0) ? -1.0 : 0.0;
-		}
-
 		public static double Cot(double x)
 		{
 			return 1.0 / Math.Tan(x);
@@ -44,12 +38,12 @@ namespace lexCalculator.Calculation
 
 		public static double Asec(double x)
 		{
-			return Math.Cos(1.0 / x);
+			return Math.Acos(1.0 / x);
 		}
 
 		public static double Acsc(double x)
 		{
-			return Math.Sin(1.0 / x);
+			return Math.Asin(1.0 / x);
 		}
 
 		public static double Coth(double x)
