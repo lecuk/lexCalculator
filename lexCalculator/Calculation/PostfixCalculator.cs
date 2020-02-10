@@ -72,9 +72,10 @@ namespace lexCalculator.Calculation
 			}
 		}
 
-		void CalculateMultipleWithBuffer(MemoryStream codeStream, IReadOnlyVariableTable table, double[,] parameters, Stack<double[]> resultStack)
+		double[] CalculateMultipleWithBuffer(MemoryStream codeStream, IReadOnlyVariableTable table, double[,] parameters)
 		{
-			int parameterCount = parameters.GetLength(0);
+			int iterations = parameters.GetLength(0);
+			Stack<double[]> resultStack = new Stack<double[]>();
 			byte[] buffer = new byte[sizeof(double)];
 
 			// a small memory & time optimization: it allows multiple usage of number buffers after performing calculations on them
@@ -85,9 +86,9 @@ namespace lexCalculator.Calculation
 				int command = codeStream.ReadByte();
 				if (command == -1) throw new Exception("Can't execute next command");
 
-				double[] values = (freeValueBuffers.Count > 0) ? freeValueBuffers.Dequeue() : new double[parameterCount];
+				double[] values = (freeValueBuffers.Count > 0) ? freeValueBuffers.Dequeue() : new double[iterations];
 
-				if ((PostfixFunction.CodeCommand)command == PostfixFunction.CodeCommand.End) return;
+				if ((PostfixFunction.CodeCommand)command == PostfixFunction.CodeCommand.End) return resultStack.Pop();
 
 				switch ((PostfixFunction.CodeCommand)command)
 				{
@@ -96,7 +97,7 @@ namespace lexCalculator.Calculation
 						codeStream.Read(buffer, 0, sizeof(double));
 						double literal = BitConverter.ToDouble(buffer, 0);
 
-						for (int i = 0; i < parameterCount; ++i)
+						for (int i = 0; i < iterations; ++i)
 						{
 							values[i] = literal;
 						}
@@ -108,7 +109,7 @@ namespace lexCalculator.Calculation
 						codeStream.Read(buffer, 0, sizeof(int));
 						int index = BitConverter.ToInt32(buffer, 0);
 
-						for (int i = 0; i < parameterCount; ++i)
+						for (int i = 0; i < iterations; ++i)
 						{
 							values[i] = table[index];
 						}
@@ -120,7 +121,7 @@ namespace lexCalculator.Calculation
 						codeStream.Read(buffer, 0, sizeof(int));
 						int index = BitConverter.ToInt32(buffer, 0);
 
-						for (int i = 0; i < parameterCount; ++i)
+						for (int i = 0; i < iterations; ++i)
 						{
 							values[i] = parameters[i, index];
 						}
@@ -165,9 +166,7 @@ namespace lexCalculator.Calculation
 
 		public double[] CalculateMultiple(PostfixFunction expression, double[,] parameters)
 		{
-			Stack<double[]> resultStack = new Stack<double[]>();
-			CalculateMultipleWithBuffer(expression.GetStream(), expression.OriginalFunction.VariableTable, parameters, resultStack);
-			return resultStack.Pop();
+			return CalculateMultipleWithBuffer(expression.GetStream(), expression.OriginalFunction.VariableTable, parameters);
 		}
 	}
 }
