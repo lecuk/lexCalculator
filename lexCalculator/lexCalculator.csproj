@@ -45,6 +45,7 @@
     <Compile Include="Calculation\PostfixCalculator.cs" />
     <Compile Include="Linking\IConvertor.cs" />
     <Compile Include="Linking\ShittyConvertor.cs" />
+    <Compile Include="Types\IReadOnlyVariableTable.cs" />
     <Compile Include="Types\PostfixFunction.cs" />
     <Compile Include="Linking\ShittyLinker.cs" />
     <Compile Include="Linking\StandardLibrary.cs" />

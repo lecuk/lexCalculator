@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace lexCalculator.Types
 {
-	public class VariableTable
+	public class VariableTable : IReadOnlyVariableTable
 	{
 		public const int DEFAULT_TABLE_SIZE = 1024; // i think 1024 unique variables is enough
 

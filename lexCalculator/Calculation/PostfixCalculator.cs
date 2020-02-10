@@ -72,7 +72,7 @@ namespace lexCalculator.Calculation
 			}
 		}
 
-		void CalculateMultipleWithBuffer(MemoryStream codeStream, VariableTable table, double[,] parameters, Stack<double[]> resultStack)
+		void CalculateMultipleWithBuffer(MemoryStream codeStream, IReadOnlyVariableTable table, double[,] parameters, Stack<double[]> resultStack)
 		{
 			int parameterCount = parameters.GetLength(0);
 			byte[] buffer = new byte[sizeof(double)];
