@@ -7,7 +7,7 @@ using lexCalculator.Types;
 
 namespace lexCalculator.Calculation
 {
-	// Tree calculator is calculating result from tree recursively. It is easier to understand but is much slower.
+	// Tree calculator is calculating result from tree recursively. It is easier to understand and surprusingly fast enough but is not memory-efficient.
 	public class TreeCalculator : ICalculator<FinishedFunction>
 	{
 		private double CalculateNode(TreeNode topNode, IReadOnlyVariableTable variableTable, double[] parameters)

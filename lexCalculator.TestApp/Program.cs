@@ -180,11 +180,13 @@ namespace lexCalculator.TestApp
 					{
 						string funcName = input.Substring(1).TrimEnd(' ');
 						FinishedFunction function = userContext.FunctionTable[funcName];
-						PostfixFunction expression = convertor.Convert(function);
+						PostfixFunction postfixFunction = convertor.Convert(function);
 						Console.WriteLine("Testing functionality: ");
-						TestCalculator(postfixCalculator, expression, userContext.VariableTable, function.ParameterCount, 10, 1, true);
+						TestCalculator(postfixCalculator, postfixFunction, userContext.VariableTable, function.ParameterCount, 10, 1, true);
+						TestCalculator(treeCalculator, function, userContext.VariableTable, function.ParameterCount, 10, 1, true);
 						Console.WriteLine("Testing speed: ");
-						TestCalculator(postfixCalculator, expression, userContext.VariableTable, function.ParameterCount, 100000, 100, false);
+						TestCalculator(postfixCalculator, postfixFunction, userContext.VariableTable, function.ParameterCount, 100000, 100, false);
+						TestCalculator(treeCalculator, function, userContext.VariableTable, function.ParameterCount, 100000, 100, false);
 						continue;
 					}
 
