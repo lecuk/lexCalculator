@@ -18,6 +18,7 @@ namespace lexCalculator.TestApp
 		static ILinker linker = new ShittyLinker();
 		static IConvertor<PostfixFunction> convertor = new ShittyConvertor();
 		static ICalculator<PostfixFunction> postfixCalculator = new PostfixCalculator();
+		static ICalculator<FinishedFunction> treeCalculator = new TreeCalculator();
 
 		static void PrintLibrarySummary(CalculationContext context)
 		{
@@ -78,8 +79,7 @@ namespace lexCalculator.TestApp
 			Token[] tokens = tokenizer.Tokenize(expressionInput);
 			TreeNode tree = constructor.Construct(tokens);
 			FinishedFunction function = linker.BuildFunction(tree, context, new string[0]);
-			PostfixFunction postfixFunction = convertor.Convert(function);
-			double value = postfixCalculator.Calculate(postfixFunction);
+			double value = treeCalculator.Calculate(function);
 
 			context.VariableTable.AssignVariable(vDefinition.Name, value);
 		}
@@ -89,8 +89,7 @@ namespace lexCalculator.TestApp
 			Token[] tokens = tokenizer.Tokenize(expressionInput);
 			TreeNode tree = constructor.Construct(tokens);
 			FinishedFunction function = linker.BuildFunction(tree, context, new string[0]);
-			PostfixFunction postfixFunction = convertor.Convert(function);
-			double value = postfixCalculator.Calculate(postfixFunction);
+			double value = treeCalculator.Calculate(function);
 			
 			Console.WriteLine(String.Format(" = {0}", value.ToString("G", System.Globalization.CultureInfo.InvariantCulture)));
 		}

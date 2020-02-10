@@ -8,7 +8,7 @@ using lexCalculator.Types;
 namespace lexCalculator.Calculation
 {
 	// Tree calculator is calculating result from tree recursively. It is easier to understand but is much slower.
-	class TreeCalculator : ICalculator<FinishedFunction>
+	public class TreeCalculator : ICalculator<FinishedFunction>
 	{
 		private double CalculateNode(TreeNode topNode, IReadOnlyVariableTable variableTable, double[] parameters)
 		{
@@ -49,7 +49,7 @@ namespace lexCalculator.Calculation
 				case BinaryOperationTreeNode bNode:
 				{
 					double leftOperand = CalculateNode(bNode.LeftChild, variableTable, parameters);
-					double rightOperand = CalculateNode(bNode.LeftChild, variableTable, parameters);
+					double rightOperand = CalculateNode(bNode.RightChild, variableTable, parameters);
 
 					return BasicOperations.BinaryFunctions[bNode.Operation](leftOperand, rightOperand);
 				}
