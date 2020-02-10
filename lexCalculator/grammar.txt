@@ -3,7 +3,6 @@ identifier:
   "y123" 
   "h3ll0" 
   "f_u_n_c_t_i_o_n" 
-  "#hi#" 
   "_0123456789"
 
 number:
