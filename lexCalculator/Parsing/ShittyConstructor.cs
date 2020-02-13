@@ -6,7 +6,7 @@ using lexCalculator.Types;
 namespace lexCalculator.Parsing
 {
 	// it's a horrible class, but is's "Shitty" after all :D
-	public class ShittyExpressionConstructor : IExpressionConstructor
+	public class ShittyConstructor : IConstructor
 	{
 		class ConstructionContext
 		{

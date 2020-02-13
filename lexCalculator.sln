@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lexCalculator.TestApp", "le
 		{261E9A24-5074-437B-88A8-BB101E1722AC} = {261E9A24-5074-437B-88A8-BB101E1722AC}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lexInterpreter", "lexInterpreter\lexInterpreter.csproj", "{55153133-E2E6-49E8-AC5E-739DD21229FD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,18 @@ Global
 		{C4C313C5-5754-48A0-BA18-004D9678FB0F}.Release|x64.Build.0 = Release|Any CPU
 		{C4C313C5-5754-48A0-BA18-004D9678FB0F}.Release|x86.ActiveCfg = Release|Any CPU
 		{C4C313C5-5754-48A0-BA18-004D9678FB0F}.Release|x86.Build.0 = Release|Any CPU
+		{55153133-E2E6-49E8-AC5E-739DD21229FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55153133-E2E6-49E8-AC5E-739DD21229FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55153133-E2E6-49E8-AC5E-739DD21229FD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{55153133-E2E6-49E8-AC5E-739DD21229FD}.Debug|x64.Build.0 = Debug|Any CPU
+		{55153133-E2E6-49E8-AC5E-739DD21229FD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{55153133-E2E6-49E8-AC5E-739DD21229FD}.Debug|x86.Build.0 = Debug|Any CPU
+		{55153133-E2E6-49E8-AC5E-739DD21229FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55153133-E2E6-49E8-AC5E-739DD21229FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55153133-E2E6-49E8-AC5E-739DD21229FD}.Release|x64.ActiveCfg = Release|Any CPU
+		{55153133-E2E6-49E8-AC5E-739DD21229FD}.Release|x64.Build.0 = Release|Any CPU
+		{55153133-E2E6-49E8-AC5E-739DD21229FD}.Release|x86.ActiveCfg = Release|Any CPU
+		{55153133-E2E6-49E8-AC5E-739DD21229FD}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

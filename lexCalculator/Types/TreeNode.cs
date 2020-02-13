@@ -213,9 +213,15 @@ namespace lexCalculator.Types
 			}
 			if (Operation == UnaryOperation.Negative)
 			{
-				builder.Append("-(");
+				bool needBrackets = (Child is BinaryOperationTreeNode bChild && (
+					bChild.Operation == BinaryOperation.Addition ||
+					bChild.Operation == BinaryOperation.Substraction ||
+					bChild.Operation == BinaryOperation.Multiplication ||
+					bChild.Operation == BinaryOperation.Division));
+				builder.Append('-');
+				if (needBrackets) builder.Append('(');
 				builder.Append(Child);
-				builder.Append(")!");
+				if (needBrackets) builder.Append(')');
 			}
 			else if (Operation == UnaryOperation.AbsoluteValue)
 			{

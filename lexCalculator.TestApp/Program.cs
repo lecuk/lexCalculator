@@ -14,7 +14,7 @@ namespace lexCalculator.TestApp
 		static Random rand = new Random();
 
 		static ITokenizer tokenizer = new ShittyTokenizer();
-		static IExpressionConstructor constructor = new ShittyExpressionConstructor();
+		static IConstructor constructor = new ShittyConstructor();
 		static ILinker linker = new ShittyLinker();
 		static IConvertor<PostfixFunction> convertor = new ShittyConvertor();
 		static ICalculator<PostfixFunction> postfixCalculator = new PostfixCalculator();

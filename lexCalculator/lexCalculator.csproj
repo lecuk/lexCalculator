@@ -54,10 +54,10 @@
     <Compile Include="Types\VariableTable.cs" />
     <Compile Include="Types\TreeNode.cs" />
     <Compile Include="Types\FinishedFunction.cs" />
-    <Compile Include="Parsing\IExpressionConstructor.cs" />
+    <Compile Include="Parsing\IConstructor.cs" />
     <Compile Include="Types\Operation.cs" />
     <Compile Include="Parsing\OperatorRules.cs" />
-    <Compile Include="Parsing\ShittyExpressionConstructor.cs" />
+    <Compile Include="Parsing\ShittyConstructor.cs" />
     <Compile Include="Linking\ILinker.cs" />
     <Compile Include="Linking\StandardFunctions.cs" />
     <Compile Include="Parsing\ITokenizer.cs" />
