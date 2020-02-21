@@ -5,50 +5,26 @@ namespace lexCalculator.Types
 {
 	public class CalculationContext
 	{
-		public readonly VariableTable VariableTable;
-
-		readonly Dictionary<string, FinishedFunction> functionTable;
-		public IReadOnlyDictionary<string, FinishedFunction> FunctionTable => functionTable;
-
-		public void AssignFunction(string name, FinishedFunction function)
-		{
-			if (functionTable.ContainsKey(name))
-			{
-				functionTable[name] = function;
-			}
-			else
-			{
-				functionTable.Add(name, function);
-			}
-		}
-
-		public void RenameFunction(string name, string newName)
-		{
-			if (!functionTable.ContainsKey(name)) throw new ArgumentException(String.Format("Function \"{0}\" is not defined", name));
-			if (functionTable.ContainsKey(newName)) throw new ArgumentException(String.Format("Function \"{0}\" is already defined", newName));
-
-			FinishedFunction function = functionTable[name];
-			functionTable.Remove(name);
-			AssignFunction(newName, function);
-		}
-
+		public readonly Table<double> VariableTable;
+		public readonly Table<FinishedFunction> FunctionTable;
+		
 		public void AssignContext(CalculationContext anotherContext)
 		{
-			foreach (KeyValuePair<string, int> pair in anotherContext.VariableTable.Indexes)
+			foreach (string key in anotherContext.VariableTable.AllItemNames)
 			{
-				VariableTable.AssignVariable(pair.Key, anotherContext.VariableTable[pair.Value]);
+				VariableTable.AssignNewItem(key, anotherContext.VariableTable.GetItemWithName(key));
 			}
 
-			foreach (KeyValuePair<string, FinishedFunction> pair in anotherContext.FunctionTable)
+			foreach (string key in anotherContext.FunctionTable.AllItemNames)
 			{
-				AssignFunction(pair.Key, pair.Value);
+				FunctionTable.AssignNewItem(key, anotherContext.FunctionTable.GetItemWithName(key));
 			}
 		}
 
 		public CalculationContext()
 		{
-			VariableTable = new VariableTable();
-			functionTable = new Dictionary<string, FinishedFunction>();
+			VariableTable = new Table<double>();
+			FunctionTable = new Table<FinishedFunction>();
 		}
 	}
 }

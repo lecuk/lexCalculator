@@ -4,13 +4,15 @@ using lexCalculator.Types;
 
 namespace lexCalculator.Linking
 {
-	// It rebuilds trees in a way that unfinished tree nodes and variable nodes are replaced with
-	public class ShittyLinker : ILinker
+	public class MyLinker : ILinker
 	{
-		TreeNode InsertFunction(FunctionTreeNode fTree, string functionName, FinishedFunction function)
+		public bool InsertFunctionTreesDirectly { get; set; }
+		public bool InsertVariableValuesDirectly { get; set; }
+
+		// so, we "insert" copy of function tree in or original tree.
+		// Also, we replace all parameters with trees specified in original tree
+		TreeNode InsertFunction(UnknownFunctionTreeNode fTree, FinishedFunction function)
 		{
-			// so, what do we do here. We search for functions with our name and "insert" copy of function tree in or original tree.
-			// Also, we replace all parameters with trees specified in original tree
 			if (fTree.Parameters.Length != function.ParameterCount)
 				throw new Exception(String.Format("Invalid parameter count in \"{0}\" call (expected {1}, actual {2})",
 					fTree.Name, function.ParameterCount, fTree.Parameters.Length));
@@ -41,31 +43,36 @@ namespace lexCalculator.Linking
 					bTree.RightChild = LinkTree(bTree.RightChild, context, parameterNames);
 					break;
 
-				case FunctionTreeNode fTree:
+				case UnknownFunctionTreeNode fTree:
 				{
 					for (int i = 0; i < fTree.Parameters.Length; ++i)
 					{
 						fTree.Parameters[i] = LinkTree(fTree.Parameters[i], context, parameterNames);
 					}
 
-					if (!context.FunctionTable.ContainsKey(fTree.Name))
+					if (context.FunctionTable.IsIdentifierDefined(fTree.Name))
 					{
-						throw new Exception(String.Format("Function \"{0}\" is not defined", fTree.Name));
+						if (InsertFunctionTreesDirectly)
+							return InsertFunction(fTree, context.FunctionTable.GetItemWithName(fTree.Name));
+						
+						return new FunctionIndexTreeNode(context.FunctionTable[fTree.Name], fTree.Parameters, tree.Parent);
 					}
 
-					return InsertFunction(fTree, fTree.Name, context.FunctionTable[fTree.Name]);
+					throw new Exception(String.Format("Function \"{0}\" is not defined", fTree.Name));
 				}
 
-				case VariableTreeNode vTree:
+				case UnknownVariableTreeNode vTree:
 				{
 					for (int i = 0; i < parameterNames.Length; ++i)
 					{
 						if (vTree.Name == parameterNames[i]) return new FunctionParameterTreeNode(i);
 					}
 
-					if (context.VariableTable.Indexes.ContainsKey(vTree.Name))
+					if (context.VariableTable.IsIdentifierDefined(vTree.Name))
 					{
-						return new IndexTreeNode(context.VariableTable.Indexes[vTree.Name]);
+						if (InsertVariableValuesDirectly) return new LiteralTreeNode(context.VariableTable[vTree.Name], tree.Parent);
+						
+						return new VariableIndexTreeNode(context.VariableTable[vTree.Name], tree.Parent);
 					}
 
 					throw new Exception(String.Format("Variable \"{0}\" is not defined", vTree.Name));
@@ -76,7 +83,7 @@ namespace lexCalculator.Linking
 			return tree;
 		}
 
-		TreeNode ReplaceParameterWithTreeNode(TreeNode tree, int index, TreeNode replacement)
+		public TreeNode ReplaceParameterWithTreeNode(TreeNode tree, int index, TreeNode replacement)
 		{
 			if (tree is FunctionParameterTreeNode iTree)
 			{
@@ -101,7 +108,7 @@ namespace lexCalculator.Linking
 					bTree.RightChild = ReplaceParameterWithTreeNode(bTree.RightChild, index, replacement);
 					break;
 
-				case FunctionTreeNode fTree:
+				case UnknownFunctionTreeNode fTree:
 				{
 					for (int i = 0; i < fTree.Parameters.Length; ++i)
 					{
@@ -119,7 +126,13 @@ namespace lexCalculator.Linking
 		{
 			TreeNode treeClone = tree.Clone();
 			
-			return new FinishedFunction(LinkTree(treeClone, context, parameterNames), context.VariableTable, parameterNames.Length);
+			return new FinishedFunction(LinkTree(treeClone, context, parameterNames), context.VariableTable, context.FunctionTable, parameterNames.Length);
+		}
+
+		public MyLinker(bool insertFunctionTreesDirectly = false, bool insertVariableValuesDirectly = false)
+		{
+			InsertFunctionTreesDirectly = insertFunctionTreesDirectly;
+			InsertVariableValuesDirectly = insertVariableValuesDirectly;
 		}
 	}
 }

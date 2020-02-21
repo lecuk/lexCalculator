@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using lexCalculator.Static;
 
 namespace lexCalculator.Types
 {
@@ -40,20 +41,20 @@ namespace lexCalculator.Types
 		}
 	}
 
-	public class VariableTreeNode : TreeNode
+	public class UnknownVariableTreeNode : TreeNode
 	{
 		public string Name { get; set; }
 		public override bool HasChildren => false;
 		public override bool IsFinished => false;
 
-		public VariableTreeNode(string name, TreeNode parent = null) : base(parent)
+		public UnknownVariableTreeNode(string name, TreeNode parent = null) : base(parent)
 		{
 			Name = name;
 		}
 
 		public override TreeNode Clone(TreeNode parent = null)
 		{
-			return new VariableTreeNode(Name, parent);
+			return new UnknownVariableTreeNode(Name, parent);
 		}
 
 		public override string ToString()
@@ -84,36 +85,74 @@ namespace lexCalculator.Types
 		}
 	}
 
-	public class IndexTreeNode : TreeNode
+	public class VariableIndexTreeNode : TreeNode
 	{
 		public int Index { get; set; }
 		public override bool HasChildren => false;
 		public override bool IsFinished => true;
 
-		public IndexTreeNode(int index, TreeNode parent = null) : base(parent)
+		public VariableIndexTreeNode(int index, TreeNode parent = null) : base(parent)
 		{
 			Index = index;
 		}
 
 		public override TreeNode Clone(TreeNode parent = null)
 		{
-			return new IndexTreeNode(Index, parent);
+			return new VariableIndexTreeNode(Index, parent);
 		}
 
 		public override string ToString()
 		{
-			return String.Format("#[{0}]", Index);
+			return String.Format("V:{0}", Index);
 		}
 	}
 
-	public class FunctionTreeNode : TreeNode
+	public class FunctionIndexTreeNode : TreeNode
+	{
+		public int Index { get; set; }
+		public TreeNode[] Parameters { get; set; }
+		public override bool HasChildren => true;
+		public override bool IsFinished => true;
+
+		public FunctionIndexTreeNode(int index, TreeNode[] parameters, TreeNode parent = null) : base(parent)
+		{
+			Index = index;
+			Parameters = new TreeNode[parameters.Length];
+			for (int i = 0; i < parameters.Length; ++i)
+			{
+				Parameters[i] = parameters[i];
+				Parameters[i].Parent = this;
+			}
+		}
+
+		public override TreeNode Clone (TreeNode parent = null)
+		{
+			return new FunctionIndexTreeNode(Index, Parameters, parent);
+		}
+
+		public override string ToString()
+		{
+			StringBuilder builder = new StringBuilder();
+			builder.AppendFormat("F:{0}(", Index);
+			if (Parameters.Length > 0) builder.Append(Parameters[0]);
+			for (int i = 1; i < Parameters.Length; ++i)
+			{
+				builder.Append(", ");
+				builder.Append(Parameters[i]);
+			}
+			builder.Append(")");
+			return builder.ToString();
+		}
+	}
+
+	public class UnknownFunctionTreeNode : TreeNode
 	{
 		public string Name { get; set; }
 		public TreeNode[] Parameters { get; set; }
 		public override bool HasChildren => true;
 		public override bool IsFinished => false;
 
-		public FunctionTreeNode(string name, TreeNode[] parameters, TreeNode parent = null) : base(parent)
+		public UnknownFunctionTreeNode(string name, TreeNode[] parameters, TreeNode parent = null) : base(parent)
 		{
 			Name = name;
 			Parameters = new TreeNode[parameters.Length];
@@ -132,7 +171,7 @@ namespace lexCalculator.Types
 			{
 				newParameters[i] = Parameters[i].Clone(this);
 			}
-			return new FunctionTreeNode(Name, newParameters, parent);
+			return new UnknownFunctionTreeNode(Name, newParameters, parent);
 		}
 
 		public override string ToString()
@@ -170,72 +209,21 @@ namespace lexCalculator.Types
 			return new UnaryOperationTreeNode(Operation, Child.Clone(this), parent);
 		}
 
-		private readonly string[] UnaryToString = new string[]
-		{
-			"-",
-			"sign",
-			"sin",
-			"cos",
-			"tan",
-			"cot",
-			"sec",
-			"csc",
-			"arcsin",
-			"arccos",
-			"arctan",
-			"arccot",
-			"arcsec",
-			"arccsc",
-			"sinh",
-			"cosh",
-			"tanh",
-			"coth",
-			"sech",
-			"csch",
-			"exp",
-			"ln",
-			"sqrt",
-			"cbrt",
-			"floor",
-			"ceil",
-			"abs",
-			"!"
-		};
-
 		public override string ToString()
 		{
-			StringBuilder builder = new StringBuilder();
-			if (Operation == UnaryOperation.Factorial)
+			if (!OperationFormats.UnaryOperationFormats.ContainsKey(Operation))
 			{
-				builder.Append('(');
-				builder.Append(Child);
-				builder.Append(")!");
+				throw new Exception(String.Format("Not implemented string format of unary operator: {0}", Operation.ToString()));
 			}
-			if (Operation == UnaryOperation.Negative)
+
+			OperationFormatInfo format = OperationFormats.UnaryOperationFormats[Operation];
+			if (format.HasSpecialFormat)
 			{
-				bool needBrackets = (Child is BinaryOperationTreeNode bChild && (
-					bChild.Operation == BinaryOperation.Addition ||
-					bChild.Operation == BinaryOperation.Substraction ||
-					bChild.Operation == BinaryOperation.Multiplication ||
-					bChild.Operation == BinaryOperation.Division));
-				builder.Append('-');
-				if (needBrackets) builder.Append('(');
-				builder.Append(Child);
-				if (needBrackets) builder.Append(')');
+				return String.Format(
+					String.Format(OperationFormats.TreeNodeNeedsBrackets(this) ? "({0})" : "{0}", format.SpecialFormat),
+					Child);
 			}
-			else if (Operation == UnaryOperation.AbsoluteValue)
-			{
-				builder.Append('|');
-				builder.Append(Child);
-				builder.Append('|');
-			}
-			else
-			{
-				builder.Append(String.Format("{0}(", UnaryToString[(int)Operation]));
-				builder.Append(Child);
-				builder.Append(")");
-			}
-			return builder.ToString();
+			else return String.Format("{0}({1})", format.FunctionName, Child);
 		}
 	}
 
@@ -261,38 +249,21 @@ namespace lexCalculator.Types
 			return new BinaryOperationTreeNode(Operation, LeftChild.Clone(this), RightChild.Clone(this), parent);
 		}
 
-		private readonly string[] BinaryToString = new string[]
-		{
-			"+",
-			"-",
-			"*",
-			"/",
-			"^",
-			"%",
-			"log",
-			"nrt"
-		};
-
 		public override string ToString()
 		{
-			StringBuilder builder = new StringBuilder();
-			bool isFunction = (Operation == BinaryOperation.Logarithm || Operation == BinaryOperation.NRoot);
-			bool needBrackets = !isFunction &&
-				(Parent is BinaryOperationTreeNode pbTreeNode) &&
-				(pbTreeNode.Operation > Operation);
-
-			if (isFunction)
+			if (!OperationFormats.BinaryOperationFormats.ContainsKey(Operation))
 			{
-				builder.AppendFormat("{0}({1}, {2})", BinaryToString[(int)Operation], LeftChild, RightChild);
-			}
-			else
-			{
-				if (needBrackets) builder.Append('(');
-				builder.AppendFormat("{1} {0} {2}", BinaryToString[(int)Operation], LeftChild, RightChild);
-				if (needBrackets) builder.Append(')');
+				throw new Exception(String.Format("Not implemented string format of binary operator: {0}", Operation.ToString()));
 			}
 
-			return builder.ToString();
+			OperationFormatInfo format = OperationFormats.BinaryOperationFormats[Operation];
+			if (format.HasSpecialFormat)
+			{
+				return String.Format(
+					String.Format(OperationFormats.TreeNodeNeedsBrackets(this) ? "({0})" : "{0}", format.SpecialFormat),
+					LeftChild, RightChild);
+			}
+			else return String.Format("{0}({1}, {2})", format.FunctionName, LeftChild, RightChild);
 		}
 	}
 

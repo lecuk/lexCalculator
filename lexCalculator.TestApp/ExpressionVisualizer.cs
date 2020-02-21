@@ -1,61 +1,29 @@
 ﻿using lexCalculator.Types;
+using lexCalculator.Static;
+using lexCalculator.Linking;
 using System;
 
 namespace lexCalculator.TestApp
 {
 	class ExpressionVisualizer
 	{
-		readonly string[] UnaryToString = new string[]
+		public void VisualizeAsTree(TreeNode node, CalculationContext context)
 		{
-			"-",
-			"sign",
-			"sin",
-			"cos",
-			"tan",
-			"cot",
-			"sec",
-			"csc",
-			"arcsin",
-			"arccos",
-			"arctan",
-			"arccot",
-			"arcsec",
-			"arccsc",
-			"sinh",
-			"cosh",
-			"tanh",
-			"coth",
-			"sech",
-			"csch",
-			"exp",
-			"ln",
-			"sqrt",
-			"cbrt",
-			"floor",
-			"ceil",
-			"abs",
-			"!"
-		};
+			VisualizeAsTreeRecursion(node, context.VariableTable, context.FunctionTable, true, String.Empty);
+		}
 
-		readonly string[] BinaryToString = new string[]
-		{
-			"+",
-			"-",
-			"*",
-			"/",
-			"^",
-			"%",
-			"log",
-			"nrt"
-		};
-
-		public void VisualizeAsTree(TreeNode node, string colorStr)
+		public void VisualizeAsTreeRecursion(TreeNode node, 
+			IReadOnlyTable<double> variableTable, 
+			IReadOnlyTable<FinishedFunction> functionTable, 
+			bool recursivelyVisualiseFunctions, 
+			string colorStr)
 		{
 			for (int i = 0; i < colorStr.Length; ++i)
 			{
-				if (colorStr[i] == '0') Console.ForegroundColor = ConsoleColor.Magenta;
+				if (colorStr[i] == '0') Console.ForegroundColor = ConsoleColor.Gray;
 				if (colorStr[i] == '1') Console.ForegroundColor = ConsoleColor.Red;
 				if (colorStr[i] == '2') Console.ForegroundColor = ConsoleColor.Yellow;
+				if (colorStr[i] == '3') Console.ForegroundColor = ConsoleColor.Magenta;
 				Console.Write("|   ");
 				Console.ResetColor();
 			}
@@ -64,42 +32,67 @@ namespace lexCalculator.TestApp
 			{
 				case LiteralTreeNode lTreeNode:
 				{
-					Console.WriteLine(lTreeNode.Value.ToString("0.####", System.Globalization.CultureInfo.InvariantCulture));
-					break;
+					Console.WriteLine(lTreeNode.Value.ToString("G7", System.Globalization.CultureInfo.InvariantCulture));
 				}
+				break;
 
-				case VariableTreeNode vTreeNode:
+				case UnknownVariableTreeNode vTreeNode:
 				{
-					Console.ForegroundColor = ConsoleColor.Cyan;
+					Console.ForegroundColor = ConsoleColor.Gray;
 					Console.WriteLine(vTreeNode.Name);
 					Console.ResetColor();
-					break;
 				}
+				break;
 
 				case FunctionParameterTreeNode fpTreeNode:
 				{
 					Console.ForegroundColor = ConsoleColor.DarkGreen;
-					Console.WriteLine(fpTreeNode);
+					Console.WriteLine(String.Format("${0}", fpTreeNode.Index));
 					Console.ResetColor();
-					break;
 				}
+				break;
 
-				case IndexTreeNode iTreeNode:
+				case VariableIndexTreeNode iTreeNode:
 				{
 					Console.ForegroundColor = ConsoleColor.White;
-					Console.WriteLine(iTreeNode);
+					Console.WriteLine(String.Format("V:{0}", iTreeNode.Index));
 					Console.ResetColor();
-					break;
 				}
+				break;
 
-				case FunctionTreeNode fTreeNode:
+				case FunctionIndexTreeNode fiTreeNode:
+				{
+					if (recursivelyVisualiseFunctions)
+					{
+						TreeNode clone = functionTable[fiTreeNode.Index].TopNode.Clone();
+						MyLinker linker = new MyLinker();
+						for (int i = 0; i < fiTreeNode.Parameters.Length; ++i)
+						{
+							clone = linker.ReplaceParameterWithTreeNode(clone, i, fiTreeNode.Parameters[i]);
+						}
+						VisualizeAsTreeRecursion(clone, variableTable, functionTable, recursivelyVisualiseFunctions, colorStr);
+					}
+					else
+					{
+						Console.ForegroundColor = ConsoleColor.Magenta;
+						Console.WriteLine(String.Format("[F:{0}]", fiTreeNode.Index));
+						foreach (TreeNode child in fiTreeNode.Parameters)
+						{
+							VisualizeAsTreeRecursion(child, variableTable, functionTable, recursivelyVisualiseFunctions, colorStr + '3');
+						}
+						Console.ResetColor();
+					}
+				}
+				break;
+
+				case UnknownFunctionTreeNode fTreeNode:
 				{
 					Console.ForegroundColor = ConsoleColor.Magenta;
 					Console.WriteLine(String.Format("{0}()", fTreeNode.Name));
 					Console.ResetColor();
 					foreach (TreeNode child in fTreeNode.Parameters)
 					{
-						VisualizeAsTree(child, colorStr + '0');
+						VisualizeAsTreeRecursion(child, variableTable, functionTable, recursivelyVisualiseFunctions, colorStr + '0');
 					}
 					break;
 				}
@@ -107,19 +100,19 @@ namespace lexCalculator.TestApp
 				case UnaryOperationTreeNode uTreeNode:
 				{
 					Console.ForegroundColor = ConsoleColor.Red;
-					Console.WriteLine(String.Format("[{0}]", UnaryToString[(int)uTreeNode.Operation]));
+					Console.WriteLine(String.Format("[{0}]", OperationFormats.UnaryOperationFormats[uTreeNode.Operation].ShortName));
 					Console.ResetColor();
-					VisualizeAsTree(uTreeNode.Child, colorStr + '1');
+					VisualizeAsTreeRecursion(uTreeNode.Child, variableTable, functionTable, recursivelyVisualiseFunctions, colorStr + '1');
 					break;
 				}
 
 				case BinaryOperationTreeNode bTreeNode:
 				{
 					Console.ForegroundColor = ConsoleColor.Yellow;
-					Console.WriteLine(String.Format("[{0}]", BinaryToString[(int)bTreeNode.Operation]));
+					Console.WriteLine(String.Format("[{0}]", OperationFormats.BinaryOperationFormats[bTreeNode.Operation].ShortName));
 					Console.ResetColor();
-					VisualizeAsTree(bTreeNode.LeftChild, colorStr + '2');
-					VisualizeAsTree(bTreeNode.RightChild, colorStr + '2');
+					VisualizeAsTreeRecursion(bTreeNode.LeftChild, variableTable, functionTable, recursivelyVisualiseFunctions, colorStr + '2');
+					VisualizeAsTreeRecursion(bTreeNode.RightChild, variableTable, functionTable, recursivelyVisualiseFunctions, colorStr + '2');
 					break;
 				}
 			}
@@ -144,7 +137,7 @@ namespace lexCalculator.TestApp
 					break;
 				}
 
-				case VariableTreeNode vTreeNode:
+				case UnknownVariableTreeNode vTreeNode:
 				{
 					Console.Write(vTreeNode.Name);
 					Console.Write(' ');
@@ -158,14 +151,14 @@ namespace lexCalculator.TestApp
 					break;
 				}
 
-				case IndexTreeNode iTreeNode:
+				case VariableIndexTreeNode iTreeNode:
 				{
 					Console.Write(iTreeNode);
 					Console.Write(' ');
 					break;
 				}
 
-				case FunctionTreeNode fTreeNode:
+				case UnknownFunctionTreeNode fTreeNode:
 				{
 					Console.Write(fTreeNode.Name);
 					Console.Write(' ');
@@ -178,7 +171,7 @@ namespace lexCalculator.TestApp
 
 				case UnaryOperationTreeNode uTreeNode:
 				{
-					Console.Write(UnaryToString[(int)uTreeNode.Operation]);
+					Console.Write(OperationFormats.UnaryOperationFormats[uTreeNode.Operation].ShortName);
 					Console.Write(' ');
 					VisualizeAsPrefixEquation(uTreeNode.Child);
 					break;
@@ -186,7 +179,7 @@ namespace lexCalculator.TestApp
 
 				case BinaryOperationTreeNode bTreeNode:
 				{
-					Console.Write(BinaryToString[(int)bTreeNode.Operation]);
+					Console.Write(OperationFormats.BinaryOperationFormats[bTreeNode.Operation].ShortName);
 					Console.Write(' ');
 					VisualizeAsPrefixEquation(bTreeNode.LeftChild);
 					VisualizeAsPrefixEquation(bTreeNode.RightChild);
@@ -206,7 +199,7 @@ namespace lexCalculator.TestApp
 					break;
 				}
 
-				case VariableTreeNode vTreeNode:
+				case UnknownVariableTreeNode vTreeNode:
 				{
 					Console.Write(vTreeNode.Name);
 					Console.Write(' ');
@@ -220,14 +213,14 @@ namespace lexCalculator.TestApp
 					break;
 				}
 
-				case IndexTreeNode iTreeNode:
+				case VariableIndexTreeNode iTreeNode:
 				{
 					Console.Write(iTreeNode);
 					Console.Write(' ');
 					break;
 				}
 
-				case FunctionTreeNode fTreeNode:
+				case UnknownFunctionTreeNode fTreeNode:
 				{
 					foreach (TreeNode child in fTreeNode.Parameters)
 					{
@@ -241,7 +234,7 @@ namespace lexCalculator.TestApp
 				case UnaryOperationTreeNode uTreeNode:
 				{
 					VisualizeAsPostfixEquation(uTreeNode.Child);
-					Console.Write(UnaryToString[(int)uTreeNode.Operation]);
+					Console.Write(OperationFormats.UnaryOperationFormats[uTreeNode.Operation].ShortName);
 					Console.Write(' ');
 					break;
 				}
@@ -250,7 +243,7 @@ namespace lexCalculator.TestApp
 				{
 					VisualizeAsPostfixEquation(bTreeNode.LeftChild);
 					VisualizeAsPostfixEquation(bTreeNode.RightChild);
-					Console.Write(BinaryToString[(int)bTreeNode.Operation]);
+					Console.Write(OperationFormats.BinaryOperationFormats[bTreeNode.Operation].ShortName);
 					Console.Write(' ');
 					break;
 				}

@@ -28,7 +28,10 @@
 		CosecantHyperbolic,     // csch(a)
 
 		Exponent,				// exp(a) == e^a
-		NaturalLogarithm,		// ln(a) = log(a, e)
+		NaturalLogarithm,       // ln(a) = log(a, e)
+
+		Square,					// a * a
+		Cube,					// a * a * a
 
 		SquareRoot,				// sqrt(a)
 		CubeRoot,				// cbrt(a)

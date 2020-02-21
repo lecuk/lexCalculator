@@ -5,7 +5,7 @@ namespace lexCalculator.Types
 {
 	public class PostfixFunction
 	{
-		public enum CodeCommand
+		public enum PostfixCommand
 		{
 			End, PushLiteral, PushVariable, PushParameter, CalculateUnary, CalculateBinary
 		}

@@ -70,13 +70,25 @@ namespace lexCalculator.Calculation
 		// using S.Ramanujan's factorial approximation formula
 		public static double Factorial(double x)
 		{
-			return Math.Sqrt(2.0 * Math.PI * x) * Math.Pow(x / Math.E, x) * Math.Exp(1.0 / (12.0 * x) - 1 / (360.0 * x * x * x));
+			return (x < 0) ? Double.NaN
+				: (x == 0) ? 1.0
+				: Math.Sqrt(2 * Math.PI * x) * Math.Pow(x / Math.E, x) * Math.Exp(1.0 / (12.0 * x) - 1 / (360.0 * x * x * x));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static double Sum(double x, double y)
 		{
 			return x + y;
+		}
+
+		public static double Square(double arg)
+		{
+			return arg * arg;
+		}
+
+		public static double Cube(double arg)
+		{
+			return arg * arg * arg;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

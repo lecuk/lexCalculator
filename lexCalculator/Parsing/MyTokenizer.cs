@@ -5,7 +5,7 @@ using System.Text;
 
 namespace lexCalculator.Parsing
 {
-	public class ShittyTokenizer : ITokenizer
+	public class MyTokenizer : ITokenizer
 	{
 		Token GetSymbol(StringReader reader)
 		{

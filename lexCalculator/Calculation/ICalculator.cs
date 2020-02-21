@@ -6,6 +6,6 @@ namespace lexCalculator.Calculation
 	public interface ICalculator<T>
 	{
 		double Calculate(T obj, params double[] parameters);
-		double[] CalculateMultiple(T obj, double[,] parameters);
+		double[] CalculateMultiple(T obj, double[][] parameters);
 	}
 }

@@ -49,7 +49,7 @@
 
 		public override string ToString()
 		{
-			return Value.ToString("0.####", System.Globalization.CultureInfo.InvariantCulture);
+			return Value.ToString("G7", System.Globalization.CultureInfo.InvariantCulture);
 		}
 	}
 }

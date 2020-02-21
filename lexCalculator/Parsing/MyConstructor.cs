@@ -6,7 +6,7 @@ using lexCalculator.Types;
 namespace lexCalculator.Parsing
 {
 	// it's a horrible class, but is's "Shitty" after all :D
-	public class ShittyConstructor : IConstructor
+	public class MyConstructor : IConstructor
 	{
 		class ConstructionContext
 		{
@@ -120,11 +120,11 @@ namespace lexCalculator.Parsing
 					// variable
 					if (!context.TryPeekNextToken(out Token nextToken))
 					{
-						return new VariableTreeNode(identifierToken.Identifier);
+						return new UnknownVariableTreeNode(identifierToken.Identifier);
 					}
 					else if (!(nextToken is SymbolToken nextSymbolToken && nextSymbolToken.Symbol == '('))
 					{
-						return new VariableTreeNode(identifierToken.Identifier);
+						return new UnknownVariableTreeNode(identifierToken.Identifier);
 					}
 
 					// if we are here, then it's a function
@@ -137,7 +137,7 @@ namespace lexCalculator.Parsing
 						emptyFuncSymbolToken.Symbol == ')')
 					{
 						context.EatLastToken(); // eat right brackets
-						return new FunctionTreeNode(identifierToken.Identifier, new TreeNode[0]);
+						return new UnknownFunctionTreeNode(identifierToken.Identifier, new TreeNode[0]);
 					}
 
 					// parse each parameter
@@ -158,7 +158,7 @@ namespace lexCalculator.Parsing
 						throw new Exception(String.Format("Can't parse function (no delimeter token)"));
 					}
 					
-					return new FunctionTreeNode(identifierToken.Identifier, parameters.ToArray());
+					return new UnknownFunctionTreeNode(identifierToken.Identifier, parameters.ToArray());
 				}
 
 				// literal

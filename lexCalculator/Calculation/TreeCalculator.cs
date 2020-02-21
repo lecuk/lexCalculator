@@ -7,19 +7,19 @@ using lexCalculator.Types;
 
 namespace lexCalculator.Calculation
 {
-	// Tree calculator is calculating result from tree recursively. It is easier to understand and surprusingly fast enough but is not memory-efficient.
+	// Tree calculator is calculating result from tree recursively. It is easier to understand and surprisingly fast enough but is not memory-efficient.
 	public class TreeCalculator : ICalculator<FinishedFunction>
 	{
-		private double CalculateNode(TreeNode topNode, IReadOnlyVariableTable variableTable, double[] parameters)
+		private double CalculateNode(TreeNode topNode, IReadOnlyTable<double> variableTable, IReadOnlyTable<FinishedFunction> functionTable, double[] parameters)
 		{
 			switch (topNode)
 			{
-				case VariableTreeNode vNode:
+				case UnknownVariableTreeNode vNode:
 				{
 					throw new Exception(String.Format("Variable \"{0}\" is not defined", vNode.Name));
 				}
 
-				case FunctionTreeNode fNode:
+				case UnknownFunctionTreeNode fNode:
 				{
 					throw new Exception(String.Format("Function \"{0}\" is not defined", fNode.Name));
 				}
@@ -34,24 +34,37 @@ namespace lexCalculator.Calculation
 					return parameters[fpNode.Index];
 				}
 
-				case IndexTreeNode iNode:
+				case FunctionIndexTreeNode iNode:
+				{
+					double[] localParameters = new double[iNode.Parameters.Length];
+
+					for (int p = 0; p < iNode.Parameters.Length; ++p)
+					{
+						localParameters[p] = CalculateNode(iNode.Parameters[p], variableTable, functionTable, parameters);
+					}
+
+					// note that we call that function with its own local parameters
+					return CalculateNode(functionTable[iNode.Index].TopNode, variableTable, functionTable, localParameters);
+				}
+
+				case VariableIndexTreeNode iNode:
 				{
 					return variableTable[iNode.Index];
 				}
 
 				case UnaryOperationTreeNode uNode:
 				{
-					double operand = CalculateNode(uNode.Child, variableTable, parameters);
+					double operand = CalculateNode(uNode.Child, variableTable, functionTable, parameters);
 
-					return BasicOperations.UnaryFunctions[uNode.Operation](operand);
+					return OperationImplementations.UnaryFunctions[uNode.Operation](operand);
 				}
 
 				case BinaryOperationTreeNode bNode:
 				{
-					double leftOperand = CalculateNode(bNode.LeftChild, variableTable, parameters);
-					double rightOperand = CalculateNode(bNode.RightChild, variableTable, parameters);
+					double leftOperand = CalculateNode(bNode.LeftChild, variableTable, functionTable, parameters);
+					double rightOperand = CalculateNode(bNode.RightChild, variableTable, functionTable, parameters);
 
-					return BasicOperations.BinaryFunctions[bNode.Operation](leftOperand, rightOperand);
+					return OperationImplementations.BinaryFunctions[bNode.Operation](leftOperand, rightOperand);
 				}
 
 				default: throw new Exception("Unknown tree node");
@@ -60,22 +73,22 @@ namespace lexCalculator.Calculation
 
 		public double Calculate(FinishedFunction function, params double[] parameters)
 		{
-			return CalculateNode(function.TopNode, function.VariableTable, parameters);
+			return CalculateNode(function.TopNode, function.VariableTable, function.FunctionTable, parameters);
 		}
 
-		private double[] CalculateNodeMultiple(TreeNode topNode, IReadOnlyVariableTable variableTable, double[,] parameters, Queue<double[]> freeValueBuffers)
+		private double[] CalculateNodeMultiple(TreeNode topNode, IReadOnlyTable<double> variableTable, IReadOnlyTable<FinishedFunction> functionTable, double[][] parameters, Queue<double[]> freeValueBuffers)
 		{
 			int iterations = parameters.GetLength(0);
 			double[] result = (freeValueBuffers.Count > 0) ? freeValueBuffers.Dequeue() : new double[iterations];
 
 			switch (topNode)
 			{
-				case VariableTreeNode vNode:
+				case UnknownVariableTreeNode vNode:
 				{
 					throw new Exception(String.Format("Variable \"{0}\" is not defined", vNode.Name));
 				}
 
-				case FunctionTreeNode fNode:
+				case UnknownFunctionTreeNode fNode:
 				{
 					throw new Exception(String.Format("Function \"{0}\" is not defined", fNode.Name));
 				}
@@ -93,12 +106,12 @@ namespace lexCalculator.Calculation
 				{
 					for (int i = 0; i < iterations; ++i)
 					{
-						result[i] = parameters[i, fpNode.Index];
+						result[i] = parameters[i][fpNode.Index];
 					}
 					return result;
 				}
 
-				case IndexTreeNode iNode:
+				case VariableIndexTreeNode iNode:
 				{
 					for (int i = 0; i < iterations; ++i)
 					{
@@ -107,11 +120,26 @@ namespace lexCalculator.Calculation
 					return result;
 				}
 
+				case FunctionIndexTreeNode iNode:
+				{
+					freeValueBuffers.Enqueue(result); // we don't need it
+
+					double[][] localParameters = new double[iNode.Parameters.Length][];
+					
+					for (int p = 0; p < iNode.Parameters.Length; ++p)
+					{
+						localParameters[p] = CalculateNodeMultiple(iNode.Parameters[p], variableTable, functionTable, parameters, freeValueBuffers);
+					}
+
+					// note that we call that function with its own local parameters
+					return CalculateNodeMultiple(functionTable[iNode.Index].TopNode, variableTable, functionTable, localParameters, freeValueBuffers);
+				}
+
 				case UnaryOperationTreeNode uNode:
 				{
-					double[] operands = CalculateNodeMultiple(uNode.Child, variableTable, parameters, freeValueBuffers);
+					double[] operands = CalculateNodeMultiple(uNode.Child, variableTable, functionTable, parameters, freeValueBuffers);
 
-					BasicOperations.UnaryArrayFunctions[uNode.Operation](operands, result);
+					OperationImplementations.UnaryArrayFunctions[uNode.Operation](operands, result);
 					freeValueBuffers.Enqueue(operands);
 
 					return result;
@@ -119,10 +147,10 @@ namespace lexCalculator.Calculation
 
 				case BinaryOperationTreeNode bNode:
 				{					
-					double[] leftOperands = CalculateNodeMultiple(bNode.LeftChild, variableTable, parameters, freeValueBuffers);
-					double[] rightOperands = CalculateNodeMultiple(bNode.RightChild, variableTable, parameters, freeValueBuffers);
+					double[] leftOperands = CalculateNodeMultiple(bNode.LeftChild, variableTable, functionTable, parameters, freeValueBuffers);
+					double[] rightOperands = CalculateNodeMultiple(bNode.RightChild, variableTable, functionTable, parameters, freeValueBuffers);
 
-					BasicOperations.BinaryArrayFunctions[bNode.Operation](leftOperands, rightOperands, result);
+					OperationImplementations.BinaryArrayFunctions[bNode.Operation](leftOperands, rightOperands, result);
 					freeValueBuffers.Enqueue(leftOperands);
 					freeValueBuffers.Enqueue(rightOperands);
 
@@ -133,12 +161,12 @@ namespace lexCalculator.Calculation
 			}
 		}
 
-		public double[] CalculateMultiple(FinishedFunction function, double[,] parameters)
+		public double[] CalculateMultiple(FinishedFunction function, double[][] parameters)
 		{
 			// a small memory & time optimization: it allows multiple usage of number buffers after performing calculations on them
 			Queue<double[]> freeValueBuffers = new Queue<double[]>();
 
-			return CalculateNodeMultiple(function.TopNode, function.VariableTable, parameters, freeValueBuffers);
+			return CalculateNodeMultiple(function.TopNode, function.VariableTable, function.FunctionTable, parameters, freeValueBuffers);
 		}
 	}
 }

@@ -11,22 +11,24 @@ namespace lexCalculator.Linking
 
 			foreach (KeyValuePair<string, double> pair in StandardVariables.Variables)
 			{
-				context.VariableTable.AssignNewVariable(pair.Key, pair.Value);
+				context.VariableTable.AssignNewItem(pair.Key, pair.Value);
 			}
 
 			foreach (KeyValuePair<string, UnaryOperation> pair in StandardFunctions.UnaryFunctions)
 			{
-				context.AssignFunction(pair.Key, new FinishedFunction( 
+				context.FunctionTable.AssignNewItem(pair.Key, new FinishedFunction( 
 					new UnaryOperationTreeNode(pair.Value, new FunctionParameterTreeNode(0)), 
 					context.VariableTable,
+					context.FunctionTable,
 					1));
 			}
 
 			foreach (KeyValuePair<string, BinaryOperation> pair in StandardFunctions.BinaryFunctions)
 			{
-				context.AssignFunction(pair.Key, new FinishedFunction(
+				context.FunctionTable.AssignNewItem(pair.Key, new FinishedFunction(
 					new BinaryOperationTreeNode(pair.Value, new FunctionParameterTreeNode(0), new FunctionParameterTreeNode(1)),
 					context.VariableTable,
+					context.FunctionTable,
 					2));
 			}
 

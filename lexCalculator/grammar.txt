@@ -31,8 +31,11 @@ expression:
 
 function:
   identifier()
+  identifier'()
   identifier(expression)
+  identifier'(expression)
   identifier(expression, ...)
+  identifier'(expression, ...)
 
 term:
   (expression)
@@ -43,3 +46,4 @@ term:
   +term
   -term
   term!
+  term'

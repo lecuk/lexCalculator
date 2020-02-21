@@ -16,7 +16,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>true</Optimize>
+    <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -38,30 +38,38 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Calculation\BasicOperations.cs" />
+    <Compile Include="Calculation\OperationImplementations.cs" />
+    <Compile Include="Calculation\ParallelGPUCalculator.cs" />
     <Compile Include="Calculation\TreeCalculator.cs" />
     <Compile Include="Calculation\ICalculator.cs" />
     <Compile Include="Calculation\MoreMath.cs" />
     <Compile Include="Calculation\PostfixCalculator.cs" />
     <Compile Include="Linking\IConvertor.cs" />
-    <Compile Include="Linking\ShittyConvertor.cs" />
-    <Compile Include="Types\IReadOnlyVariableTable.cs" />
+    <Compile Include="Linking\PostfixConvertor.cs" />
+    <Compile Include="Processing\IDiffertiator.cs" />
+    <Compile Include="Processing\IOptimizer.cs" />
+    <Compile Include="Processing\MyDifferentiator.cs" />
+    <Compile Include="Processing\MyOptimizer.cs" />
+    <Compile Include="Static\lexCUDAHelper.cs" />
+    <Compile Include="Static\OperationFormats.cs" />
+    <Compile Include="Types\IReadOnlyTable.cs" />
+    <Compile Include="Types\OperationFormatInfo.cs" />
     <Compile Include="Types\PostfixFunction.cs" />
-    <Compile Include="Linking\ShittyLinker.cs" />
+    <Compile Include="Linking\MyLinker.cs" />
     <Compile Include="Linking\StandardLibrary.cs" />
     <Compile Include="Linking\StandardVariables.cs" />
     <Compile Include="Types\CalculationContext.cs" />
-    <Compile Include="Types\VariableTable.cs" />
+    <Compile Include="Types\Table.cs" />
     <Compile Include="Types\TreeNode.cs" />
     <Compile Include="Types\FinishedFunction.cs" />
     <Compile Include="Parsing\IConstructor.cs" />
     <Compile Include="Types\Operation.cs" />
     <Compile Include="Parsing\OperatorRules.cs" />
-    <Compile Include="Parsing\ShittyConstructor.cs" />
+    <Compile Include="Parsing\MyConstructor.cs" />
     <Compile Include="Linking\ILinker.cs" />
     <Compile Include="Linking\StandardFunctions.cs" />
     <Compile Include="Parsing\ITokenizer.cs" />
-    <Compile Include="Parsing\ShittyTokenizer.cs" />
+    <Compile Include="Parsing\MyTokenizer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Parsing\Token.cs" />
     <Compile Include="Parsing\ParserRules.cs" />
@@ -69,6 +77,8 @@
   <ItemGroup>
     <Content Include="grammar.txt" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
