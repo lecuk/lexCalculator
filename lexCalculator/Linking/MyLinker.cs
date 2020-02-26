@@ -21,10 +21,7 @@ namespace lexCalculator.Linking
 			TreeNode[] parameters = fTree.Parameters;
 
 			TreeNode newTree = function.TopNode.Clone();
-			for (int i = 0; i < fTree.Parameters.Length; ++i)
-			{
-				newTree = ReplaceParameterWithTreeNode(newTree, i, parameters[i]);
-			}
+			newTree = ReplaceParametersWithTreeNodes(newTree, parameters);
 			newTree.Parent = parent;
 
 			return newTree;
@@ -53,9 +50,11 @@ namespace lexCalculator.Linking
 					if (context.FunctionTable.IsIdentifierDefined(fTree.Name))
 					{
 						if (InsertFunctionTreesDirectly)
-							return InsertFunction(fTree, context.FunctionTable.GetItemWithName(fTree.Name));
+						{
+							return InsertFunction(fTree, context.FunctionTable[fTree.Name]);
+						}
 						
-						return new FunctionIndexTreeNode(context.FunctionTable[fTree.Name], fTree.Parameters, tree.Parent);
+						return new FunctionIndexTreeNode(context.FunctionTable.GetIndex(fTree.Name), fTree.Parameters, tree.Parent);
 					}
 
 					throw new Exception(String.Format("Function \"{0}\" is not defined", fTree.Name));
@@ -72,7 +71,7 @@ namespace lexCalculator.Linking
 					{
 						if (InsertVariableValuesDirectly) return new LiteralTreeNode(context.VariableTable[vTree.Name], tree.Parent);
 						
-						return new VariableIndexTreeNode(context.VariableTable[vTree.Name], tree.Parent);
+						return new VariableIndexTreeNode(context.VariableTable.GetIndex(vTree.Name), tree.Parent);
 					}
 
 					throw new Exception(String.Format("Variable \"{0}\" is not defined", vTree.Name));
@@ -83,36 +82,35 @@ namespace lexCalculator.Linking
 			return tree;
 		}
 
-		public TreeNode ReplaceParameterWithTreeNode(TreeNode tree, int index, TreeNode replacement)
+		public TreeNode ReplaceParametersWithTreeNodes(TreeNode tree, TreeNode[] parameterTrees)
 		{
 			if (tree is FunctionParameterTreeNode iTree)
 			{
-				if (iTree.Index == index)
-				{
-					TreeNode parent = tree.Parent;
-					tree = replacement;
-					tree.Parent = parent;
-					return tree;
-				}
+				if (iTree.Index < 0 || iTree.Index >= parameterTrees.Length) throw new Exception("No such parameter in tree");
+
+				TreeNode parent = tree.Parent;
+				tree = parameterTrees[iTree.Index];
+				tree.Parent = parent;
+				return tree;
 			}
 
 			// recursively checking children
 			switch (tree)
 			{
 				case UnaryOperationTreeNode uTree:
-					uTree.Child = ReplaceParameterWithTreeNode(uTree.Child, index, replacement);
+					uTree.Child = ReplaceParametersWithTreeNodes(uTree.Child, parameterTrees);
 					break;
 
 				case BinaryOperationTreeNode bTree:
-					bTree.LeftChild = ReplaceParameterWithTreeNode(bTree.LeftChild, index, replacement);
-					bTree.RightChild = ReplaceParameterWithTreeNode(bTree.RightChild, index, replacement);
+					bTree.LeftChild = ReplaceParametersWithTreeNodes(bTree.LeftChild, parameterTrees);
+					bTree.RightChild = ReplaceParametersWithTreeNodes(bTree.RightChild, parameterTrees);
 					break;
 
 				case UnknownFunctionTreeNode fTree:
 				{
 					for (int i = 0; i < fTree.Parameters.Length; ++i)
 					{
-						fTree.Parameters[i] = ReplaceParameterWithTreeNode(fTree.Parameters[i], index, replacement);
+						fTree.Parameters[i] = ReplaceParametersWithTreeNodes(fTree.Parameters[i], parameterTrees);
 					}
 					break;
 				}

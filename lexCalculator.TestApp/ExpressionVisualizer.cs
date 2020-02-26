@@ -66,10 +66,8 @@ namespace lexCalculator.TestApp
 					{
 						TreeNode clone = functionTable[fiTreeNode.Index].TopNode.Clone();
 						MyLinker linker = new MyLinker();
-						for (int i = 0; i < fiTreeNode.Parameters.Length; ++i)
-						{
-							clone = linker.ReplaceParameterWithTreeNode(clone, i, fiTreeNode.Parameters[i]);
-						}
+						clone = linker.ReplaceParametersWithTreeNodes(clone, fiTreeNode.Parameters);
+						
 						VisualizeAsTreeRecursion(clone, variableTable, functionTable, recursivelyVisualiseFunctions, colorStr);
 					}
 					else

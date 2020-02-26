@@ -17,11 +17,21 @@ namespace lexCalculator.Types
 		private readonly Dictionary<string, int> indexes;
 		public IEnumerable<string> AllItemNames => indexes.Keys;
 
-		public int this[string key]
+		public T this[int index]
 		{
 			get
 			{
-				return indexes[key];
+				return items[index];
+			}
+		}
+
+		public T this[string name]
+		{
+			get
+			{
+				if (!IsIdentifierDefined(name)) throw new Exception("No such item");
+
+				return items[indexes[name]];
 			}
 		}
 		
@@ -30,28 +40,11 @@ namespace lexCalculator.Types
 			return indexes.ContainsKey(name);
 		}
 
-		public bool TryGetItemWithName(string key, out T item)
+		public int GetIndex(string name)
 		{
-			if (IsIdentifierDefined(key))
-			{
-				item = items[indexes[key]];
-				return true;
-			}
-			item = default(T);
-			return false;
-		}
+			if (!IsIdentifierDefined(name)) throw new Exception("No such item");
 
-		public T GetItemWithName(string key)
-		{
-			return items[indexes[key]];
-		}
-
-		public T this[int index]
-		{
-			get
-			{
-				return items[index];
-			}
+			return indexes[name];
 		}
 
 		public void RenameItem(string name, string newName)

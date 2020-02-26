@@ -12,12 +12,12 @@ namespace lexCalculator.Types
 		{
 			foreach (string key in anotherContext.VariableTable.AllItemNames)
 			{
-				VariableTable.AssignNewItem(key, anotherContext.VariableTable.GetItemWithName(key));
+				VariableTable.AssignNewItem(key, anotherContext.VariableTable[key]);
 			}
 
 			foreach (string key in anotherContext.FunctionTable.AllItemNames)
 			{
-				FunctionTable.AssignNewItem(key, anotherContext.FunctionTable.GetItemWithName(key));
+				FunctionTable.AssignNewItem(key, anotherContext.FunctionTable[key]);
 			}
 		}
 

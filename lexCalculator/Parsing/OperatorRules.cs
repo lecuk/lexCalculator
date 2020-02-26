@@ -5,40 +5,36 @@ namespace lexCalculator.Parsing
 {
 	static class OperatorRules
 	{
-		public static int GetOperatorPriority(char symbol)
+		public static int GetOperatorPriority(BinaryOperation operation)
 		{
-			if (!ParserRules.IsBinaryOperatorChar(symbol)) throw new ArgumentException("Not a binary operator");
-
-			switch (symbol)
+			switch (operation)
 			{
-				case '+':
-				case '-':
+				case BinaryOperation.Addition:
+				case BinaryOperation.Substraction:
 					return 0;
-				case '*':
-				case '/':
+				case BinaryOperation.Multiplication:
+				case BinaryOperation.Division:
 					return 1;
-				case '%':
+				case BinaryOperation.Remainder:
 					return 2;
-				case '^':
+				case BinaryOperation.Power:
 					return 3;
 				default:
 					throw new ArgumentException("Unknown binary operator");
 			}
 		}
 
-		public static bool IsOperatorLeftAssociative(char symbol)
+		public static bool IsOperatorLeftAssociative(BinaryOperation operation)
 		{
-			if (!ParserRules.IsBinaryOperatorChar(symbol)) throw new ArgumentException("Not a binary operator");
-
-			switch (symbol)
+			switch (operation)
 			{
-				case '+':
-				case '-':
-				case '*':
-				case '/':
+				case BinaryOperation.Addition:
+				case BinaryOperation.Substraction:
+				case BinaryOperation.Multiplication:
+				case BinaryOperation.Division:
 					return true;
-				case '%':
-				case '^':
+				case BinaryOperation.Remainder:
+				case BinaryOperation.Power:
 					return false;
 				default:
 					throw new ArgumentException("Unknown binary operator");

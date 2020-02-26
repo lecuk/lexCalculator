@@ -25,10 +25,7 @@ namespace lexCalculator.Linking
 		{
 			// why rewrite old code?
 			MyLinker linker = new MyLinker();
-			for (int i = 0; i < parameters.Length; ++i)
-			{
-				node = linker.ReplaceParameterWithTreeNode(node, i, parameters[i]);
-			}
+			node = linker.ReplaceParametersWithTreeNodes(node, parameters);
 		}
 
 		void ConvertRecursion(TreeNode node, IReadOnlyTable<FinishedFunction> functionTable, MemoryStream stream)

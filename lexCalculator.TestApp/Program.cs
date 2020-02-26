@@ -28,7 +28,7 @@ namespace lexCalculator.TestApp
 			Console.WriteLine("Functions: ");
 			foreach (string name in context.FunctionTable.AllItemNames)
 			{
-				FinishedFunction function = context.FunctionTable.GetItemWithName(name);
+				FinishedFunction function = context.FunctionTable[name];
 				Console.WriteLine("  {0}({1} argument{3}) = {2}", name, function.ParameterCount, function.TopNode,
 					(function.ParameterCount != 1) ? "s" : String.Empty);
 			}
@@ -36,7 +36,7 @@ namespace lexCalculator.TestApp
 			Console.WriteLine("Variables: ");
 			foreach (string name in context.VariableTable.AllItemNames)
 			{
-				double variable = context.VariableTable.GetItemWithName(name);
+				double variable = context.VariableTable[name];
 				Console.WriteLine("  {0} = #[{1}] = {2}", name, context.VariableTable[name], 
 					variable.ToString("G", System.Globalization.CultureInfo.InvariantCulture));
 			}
@@ -47,14 +47,14 @@ namespace lexCalculator.TestApp
 			Console.WriteLine("Variables: ");
 			foreach (string name in context.VariableTable.AllItemNames)
 			{
-				double variable = context.VariableTable.GetItemWithName(name);
+				double variable = context.VariableTable[name];
 				Console.WriteLine("  {0} = {1}", name, variable);
 			}
 			Console.WriteLine();
 			Console.WriteLine("Functions: ");
 			foreach (string name in context.FunctionTable.AllItemNames)
 			{
-				FinishedFunction function = context.FunctionTable.GetItemWithName(name);
+				FinishedFunction function = context.FunctionTable[name];
 				Console.WriteLine(String.Format("  Function \"{0}\"", name));
 				Console.WriteLine(function.TopNode);
 				Console.WriteLine();
@@ -103,7 +103,7 @@ namespace lexCalculator.TestApp
 		static void FindDifferentialInput(string input, int parameterIndex, CalculationContext context)
 		{
 			string funcName = input.Substring(4).Trim(' ');
-			FinishedFunction function = context.FunctionTable.GetItemWithName(funcName);
+			FinishedFunction function = context.FunctionTable[funcName];
 			MyDifferentiator differentiator = new MyDifferentiator();
 			FinishedFunction df = differentiator.FindDifferential(function, parameterIndex);
 			Console.WriteLine(df.TopNode);
@@ -117,7 +117,7 @@ namespace lexCalculator.TestApp
 		static void OptimizeInput(string input, CalculationContext context)
 		{
 			string funcName = input.Substring(10).Trim(' ');
-			FinishedFunction unoptimized = context.FunctionTable.GetItemWithName(funcName);
+			FinishedFunction unoptimized = context.FunctionTable[funcName];
 			FinishedFunction optimized = optimizer.OptimizeWithTable(unoptimized);
 			Console.WriteLine("Unoptimized: ");
 			Console.WriteLine(unoptimized.TopNode);
@@ -130,7 +130,7 @@ namespace lexCalculator.TestApp
 		static void TestInput(string input, CalculationContext context)
 		{
 			string funcName = input.Substring(6).Trim(' ');
-			FinishedFunction function = context.FunctionTable.GetItemWithName(funcName);
+			FinishedFunction function = context.FunctionTable[funcName];
 			PostfixFunction postfixFunction = convertor.Convert(function);
 			Console.WriteLine("Testing functionality: ");
 			TestCalculator(postfixCalculator, postfixFunction, context.VariableTable, function.ParameterCount, 10, 1, true);
@@ -264,7 +264,7 @@ namespace lexCalculator.TestApp
 						if (input.StartsWith("~tree "))
 						{
 							string funcName = input.Substring(6).Trim(' ');
-							visualizer.VisualizeAsTree(userContext.FunctionTable.GetItemWithName(funcName).TopNode, userContext);
+							visualizer.VisualizeAsTree(userContext.FunctionTable[funcName].TopNode, userContext);
 							continue;
 						}
 

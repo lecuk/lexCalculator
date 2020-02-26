@@ -10,16 +10,19 @@ namespace lexCalculator.Processing
 {
 	public class MyOptimizer : IOptimizer
 	{
+		bool IsConstantValueOf(TreeNode node, double value, IReadOnlyTable<double> variableTable)
+		{
+			return (IsConstant(node, variableTable, out double constantValue) && constantValue == value);
+		}
+
 		bool IsZero(TreeNode node, IReadOnlyTable<double> variableTable)
 		{
-			return (node is LiteralTreeNode lNode && lNode.Value == 0.0)
-				|| (variableTable != null && node is VariableIndexTreeNode vNode && variableTable[vNode.Index] == 0.0);
+			return IsConstantValueOf(node, 0.0, variableTable);
 		}
 
 		bool IsOne(TreeNode node, IReadOnlyTable<double> variableTable)
 		{
-			return (node is LiteralTreeNode lNode && lNode.Value == 1.0)
-				|| (variableTable != null && node is VariableIndexTreeNode vNode && variableTable[vNode.Index] == 1.0);
+			return IsConstantValueOf(node, 1.0, variableTable);
 		}
 
 		bool IsConstant(TreeNode node, IReadOnlyTable<double> variableTable, out double constantValue)
@@ -131,6 +134,54 @@ namespace lexCalculator.Processing
 			return node;
 		}
 
+		TreeNode TrySwapConstantOperands(TreeNode node, IReadOnlyTable<double> variableTable)
+		{
+			CheckChildrenRecursively(node, variableTable, TrySwapConstantOperands);
+			
+			return node;
+		}
+
+		TreeNode ReplaceSquareAndCubePowWithSqrAndCube(TreeNode node, IReadOnlyTable<double> variableTable)
+		{
+			CheckChildrenRecursively(node, variableTable, ReplaceSquareAndCubePowWithSqrAndCube);
+
+			if (node is BinaryOperationTreeNode bTreeNode
+				&& bTreeNode.Operation == BinaryOperation.Power)
+			{
+				if (IsConstantValueOf(bTreeNode.RightChild, 2.0, variableTable))
+				{
+					return new UnaryOperationTreeNode(UnaryOperation.Square, bTreeNode.LeftChild, bTreeNode.Parent);
+				}
+
+				if (IsConstantValueOf(bTreeNode.RightChild, 3.0, variableTable))
+				{
+					return new UnaryOperationTreeNode(UnaryOperation.Cube, bTreeNode.LeftChild, bTreeNode.Parent);
+				}
+			}
+
+			return node;
+		}
+
+		TreeNode RemoveZeroPower(TreeNode node, IReadOnlyTable<double> variableTable)
+		{
+			CheckChildrenRecursively(node, variableTable, RemoveZeroPower);
+
+			return (node is BinaryOperationTreeNode bTreeNode && bTreeNode.Operation == BinaryOperation.Power &&
+				(IsZero(bTreeNode.RightChild, variableTable)))
+				? new LiteralTreeNode(1.0, node.Parent)
+				: node;
+		}
+
+		TreeNode RemoveFirstPower(TreeNode node, IReadOnlyTable<double> variableTable)
+		{
+			CheckChildrenRecursively(node, variableTable, RemoveFirstPower);
+
+			return (node is BinaryOperationTreeNode bTreeNode && bTreeNode.Operation == BinaryOperation.Power &&
+				(IsOne(bTreeNode.RightChild, variableTable)))
+				? bTreeNode.LeftChild.Clone(bTreeNode.Parent)
+				: node;
+		}
+
 		public FinishedFunction Optimize(FinishedFunction unoptimized)
 		{
 			throw new NotImplementedException();
@@ -148,6 +199,10 @@ namespace lexCalculator.Processing
 			optimized.TopNode = RemoveMultiplicationByZero(optimized.TopNode, optimized.VariableTable);
 			optimized.TopNode = RemoveMultiplicationByOne(optimized.TopNode, optimized.VariableTable);
 			optimized.TopNode = RemoveZeroAdditionOrSubstraction(optimized.TopNode, optimized.VariableTable);
+			optimized.TopNode = ReplaceSquareAndCubePowWithSqrAndCube(optimized.TopNode, optimized.VariableTable);
+			optimized.TopNode = RemoveZeroPower(optimized.TopNode, optimized.VariableTable);
+			optimized.TopNode = RemoveFirstPower(optimized.TopNode, optimized.VariableTable);
+
 			return optimized;
 		}
 	}

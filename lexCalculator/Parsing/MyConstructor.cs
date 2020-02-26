@@ -188,9 +188,9 @@ namespace lexCalculator.Parsing
 			return term;
 		}
 
-		void PopOperatorAndPushResult(Stack<TreeNode> termStack, Stack<char> operatorStack)
+		void PopOperatorAndPushResult(Stack<TreeNode> termStack, Stack<BinaryOperation> operatorStack)
 		{
-			BinaryOperation operation = OperatorRules.CharToBinaryOperator(operatorStack.Pop());
+			BinaryOperation operation = operatorStack.Pop();
 			// note: operators are popped in the reverse order because stack.
 			TreeNode rightChild = termStack.Pop();
 			TreeNode leftChild = termStack.Pop();
@@ -202,7 +202,7 @@ namespace lexCalculator.Parsing
 		TreeNode ParseExpression(ConstructionContext context, params char[] stopSymbols)
 		{
 			Stack<TreeNode> termStack = new Stack<TreeNode>();
-			Stack<char> operatorStack = new Stack<char>();
+			Stack<BinaryOperation> operatorStack = new Stack<BinaryOperation>();
 			termStack.Push(ParseTermWithPossibleFactorial(context)); // expression should have at least one term
 
 			// then there should be exactly one binary operator and one term every iteration
@@ -213,20 +213,20 @@ namespace lexCalculator.Parsing
 					if (ParserRules.IsBinaryOperatorChar(symbolToken.Symbol))
 					{
 						context.EatLastToken(); // eat binary operator
-
-						char curOperator = symbolToken.Symbol;
+						
+						BinaryOperation curOperation = OperatorRules.CharToBinaryOperator(symbolToken.Symbol);
 						while (operatorStack.Count > 0)
 						{
-							char topOperator = operatorStack.Peek();
-							if ((OperatorRules.GetOperatorPriority(topOperator) > OperatorRules.GetOperatorPriority(curOperator)) ||
-								((OperatorRules.GetOperatorPriority(topOperator) == OperatorRules.GetOperatorPriority(curOperator)) &&
-								OperatorRules.IsOperatorLeftAssociative(curOperator)))
+							BinaryOperation topOperation = operatorStack.Peek();
+							if ((OperatorRules.GetOperatorPriority(topOperation) > OperatorRules.GetOperatorPriority(curOperation)) ||
+								((OperatorRules.GetOperatorPriority(topOperation) == OperatorRules.GetOperatorPriority(curOperation)) &&
+								OperatorRules.IsOperatorLeftAssociative(topOperation)))
 							{
 								PopOperatorAndPushResult(termStack, operatorStack);
 							}
 							else break;
 						}
-						operatorStack.Push(curOperator);
+						operatorStack.Push(curOperation);
 
 						termStack.Push(ParseTermWithPossibleFactorial(context));
 						continue;
