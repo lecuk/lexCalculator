@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace lexCalculator.Types
 {
 	public class Table<T> : IReadOnlyTable<T>
 	{
-		public const int DEFAULT_TABLE_SIZE = 1024;
+		public const int DEFAULT_TABLE_SIZE = 128;
 
 		private readonly T[] items;
 		private int curIndex;

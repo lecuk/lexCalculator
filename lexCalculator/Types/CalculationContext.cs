@@ -26,5 +26,10 @@ namespace lexCalculator.Types
 			VariableTable = new Table<double>();
 			FunctionTable = new Table<FinishedFunction>();
 		}
+
+		public CalculationContext(CalculationContext otherContext) : this()
+		{
+			AssignContext(otherContext);
+		}
 	}
 }

@@ -4,10 +4,10 @@ namespace lexCalculator.Types
 {
 	public class FinishedFunction
 	{
-		public TreeNode TopNode { get; set; }
-		public IReadOnlyTable<double> VariableTable { get; set; }
-		public IReadOnlyTable<FinishedFunction> FunctionTable { get; set; }
-		public int ParameterCount { get; set; }
+		public TreeNode TopNode { get; private set; }
+		public IReadOnlyTable<double> VariableTable { get; private set; }
+		public IReadOnlyTable<FinishedFunction> FunctionTable { get; private set; }
+		public int ParameterCount { get; private set; }
 
 		public FinishedFunction(TreeNode topNode, IReadOnlyTable<double> variableTable, IReadOnlyTable<FinishedFunction> functionTable, int parameterCount = 0)
 		{

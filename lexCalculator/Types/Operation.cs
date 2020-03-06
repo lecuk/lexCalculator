@@ -1,71 +1,49 @@
-﻿namespace lexCalculator.Types
+﻿using System;
+using System.Collections.Generic;
+using lexCalculator.Types.Operations;
+
+namespace lexCalculator.Types
 {
-	// Represents an unary operator or function with exactly one parameter.
-	public enum UnaryOperation
+	public abstract class Operation
 	{
-		Negative,				// -a
-		Sign,					// sign(a)
+		public enum ArgumentType
+		{
+			Unary,
+			Binary,
+			List,
+			Variable
+		}
 
-		Sine,					// sin(a)
-		Cosine,					// cos(a)
-		Tangent,				// tan(a)
-		Cotangent,              // cot(a)
-		Secant,                 // sec(a)
-		Cosecant,               // csc(a)
+		private static int lastId = 0;
 
-		ArcSine,				// arcsin(a)
-		ArcCosine,				// arccos(a)
-		ArcTangent,				// arctan(a)
-		ArcCotangent,           // arccot(a)
-		ArcSecant,              // arcsec(a)
-		ArcCosecant,            // arccsc(a)
+		public readonly int Id;
+		public readonly ArgumentType Type;
+		public readonly string FunctionName;
+		public readonly string SpecialFormat;
+		public readonly bool ChildrenInSpecialFormatMayNeedBrackets;
 
-		SineHyperbolic,			// sinh(a)
-		CosineHyperbolic,		// cos(a)
-		TangentHyperbolic,		// tan(a)
-		CotangentHyperbolic,    // cot(a)
-		SecantHyperbolic,       // sech(a)
-		CosecantHyperbolic,     // csch(a)
-
-		Exponent,				// exp(a) == e^a
-		NaturalLogarithm,       // ln(a) = log(a, e)
-
-		Square,					// a * a
-		Cube,					// a * a * a
-
-		SquareRoot,				// sqrt(a)
-		CubeRoot,				// cbrt(a)
-
-		Floor,					// floor(a)
-		Ceiling,				// ceil(a)
-		AbsoluteValue,			// abs(a) == |a|
-
-		Factorial				// a!
-	}
-
-	// Represents an arithmetic binary operation or function with exactly two parameters.
-	public enum BinaryOperation
-	{
-		Addition,				// a + b
-		Substraction,			// a - b
-		Multiplication,			// a * b
-		Division,				// a / b
-		Power,					// a ^ b
-		Remainder,				// a % b
-
-		Logarithm,				// log(a, p)
-
-		NRoot,					// nrt(a, n)
-	}
-
-	// Represents a function with variable number of arguments or list as single argument. (Not yet implemented)
-	public enum ListOperation
-	{
-		Max,					// max(a1, a2, ...)
-		Min,					// min(a1, a2, ...)
-		Mean,					// mean(a1, a2, ...)
+		public bool HasSpecialFormat
+		{
+			get
+			{
+				return (SpecialFormat != null);
+			}
+		}
 		
-		GreatestCommonDivisor,	// gcd(a1, a2, ...)
-		LeastCommonDenominator	// lcd(a1, a2, ...)
+		protected Operation(ArgumentType type, string functionName, string specialFormat, bool childrenInSpecialFormatMayNeedBrackets)
+		{
+			Type = type;
+			FunctionName = functionName ?? throw new ArgumentNullException(nameof(functionName));
+			SpecialFormat = specialFormat;
+			ChildrenInSpecialFormatMayNeedBrackets = (specialFormat != null) ? childrenInSpecialFormatMayNeedBrackets : false;
+
+			Id = lastId;
+			++lastId;
+		}
+
+		public bool Equals(Operation operation)
+		{
+			return (Id == operation.Id);
+		}
 	}
 }

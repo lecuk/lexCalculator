@@ -2,7 +2,7 @@
 
 namespace lexCalculator.Parsing
 {
-	public interface IConstructor
+	public interface IParser
 	{
 		TreeNode Construct(Token[] tokens);
 	}

@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using lexCalculator.Types;
+using lexCalculator.Types.TreeNodes;
+using lexCalculator.Types.Operations;
 
 namespace lexCalculator.Parsing
 {
-	// it's a horrible class, but is's "Shitty" after all :D
-	public class MyConstructor : IConstructor
+	public class DefaultParser : IParser
 	{
 		class ConstructionContext
 		{
@@ -80,27 +81,15 @@ namespace lexCalculator.Parsing
 					if (symbolToken.Symbol == '(')
 					{
 						TreeNode node = ParseExpression(context, ')');
-						if (context.TryPeekNextToken(out Token parentnesisEndToken) &&
-						parentnesisEndToken is SymbolToken parentnesisEndSymbolToken &&
-						parentnesisEndSymbolToken.Symbol == ')')
-						{
-							context.EatLastToken(); // eat right brackets
-							return node;
-						}
-						throw new Exception("Mismatched brackets");
+						context.EatLastToken(); // eat right brackets
+						return node;
 					}
 					// |expression|
 					else if (symbolToken.Symbol == '|')
 					{
 						TreeNode node = ParseExpression(context, '|');
-						if (context.TryPeekNextToken(out Token parentnesisEndToken) && 
-							parentnesisEndToken is SymbolToken parentnesisEndSymbolToken &&
-							parentnesisEndSymbolToken.Symbol == '|')
-						{
-							context.EatLastToken(); // eat right brackets
-							return new UnaryOperationTreeNode(UnaryOperation.AbsoluteValue, node);
-						}
-						throw new Exception("Mismatched brackets");
+						context.EatLastToken(); // eat right brackets
+						return new UnaryOperationTreeNode(UnaryOperation.AbsoluteValue, node);
 					}
 					// -term
 					else if (symbolToken.Symbol == '-')
@@ -120,11 +109,11 @@ namespace lexCalculator.Parsing
 					// variable
 					if (!context.TryPeekNextToken(out Token nextToken))
 					{
-						return new UnknownVariableTreeNode(identifierToken.Identifier);
+						return new UndefinedVariableTreeNode(identifierToken.Identifier);
 					}
 					else if (!(nextToken is SymbolToken nextSymbolToken && nextSymbolToken.Symbol == '('))
 					{
-						return new UnknownVariableTreeNode(identifierToken.Identifier);
+						return new UndefinedVariableTreeNode(identifierToken.Identifier);
 					}
 
 					// if we are here, then it's a function
@@ -137,7 +126,7 @@ namespace lexCalculator.Parsing
 						emptyFuncSymbolToken.Symbol == ')')
 					{
 						context.EatLastToken(); // eat right brackets
-						return new UnknownFunctionTreeNode(identifierToken.Identifier, new TreeNode[0]);
+						return new UndefinedFunctionTreeNode(identifierToken.Identifier, new TreeNode[0]);
 					}
 
 					// parse each parameter
@@ -154,17 +143,15 @@ namespace lexCalculator.Parsing
 							if (delimSymbolToken.Symbol == ')') break;
 							throw new Exception(String.Format("Can't parse function (unknown delimeter token '{0}')", delimSymbolToken));
 						}
-						// if we're here, then something is wrong
-						throw new Exception(String.Format("Can't parse function (no delimeter token)"));
 					}
 					
-					return new UnknownFunctionTreeNode(identifierToken.Identifier, parameters.ToArray());
+					return new UndefinedFunctionTreeNode(identifierToken.Identifier, parameters.ToArray());
 				}
 
 				// literal
-				case NumberToken literalToken:
+				case NumberToken numberToken:
 				{
-					return new LiteralTreeNode(literalToken.Value);
+					return new NumberTreeNode(numberToken.Value);
 				}
 			}
 
@@ -188,7 +175,7 @@ namespace lexCalculator.Parsing
 			return term;
 		}
 
-		void PopOperatorAndPushResult(Stack<TreeNode> termStack, Stack<BinaryOperation> operatorStack)
+		void PopOperatorAndPushResult(Stack<TreeNode> termStack, Stack<BinaryOperatorOperation> operatorStack)
 		{
 			BinaryOperation operation = operatorStack.Pop();
 			// note: operators are popped in the reverse order because stack.
@@ -202,7 +189,7 @@ namespace lexCalculator.Parsing
 		TreeNode ParseExpression(ConstructionContext context, params char[] stopSymbols)
 		{
 			Stack<TreeNode> termStack = new Stack<TreeNode>();
-			Stack<BinaryOperation> operatorStack = new Stack<BinaryOperation>();
+			Stack<BinaryOperatorOperation> operatorStack = new Stack<BinaryOperatorOperation>();
 			termStack.Push(ParseTermWithPossibleFactorial(context)); // expression should have at least one term
 
 			// then there should be exactly one binary operator and one term every iteration
@@ -210,17 +197,16 @@ namespace lexCalculator.Parsing
 			{
 				if (token is SymbolToken symbolToken)
 				{
-					if (ParserRules.IsBinaryOperatorChar(symbolToken.Symbol))
+					if (ParseRules.IsBinaryOperatorChar(symbolToken.Symbol))
 					{
 						context.EatLastToken(); // eat binary operator
-						
-						BinaryOperation curOperation = OperatorRules.CharToBinaryOperator(symbolToken.Symbol);
+
+						BinaryOperatorOperation curOperation = BinaryOperatorOperation.OperatorDictionary[symbolToken.Symbol.ToString()];
 						while (operatorStack.Count > 0)
 						{
-							BinaryOperation topOperation = operatorStack.Peek();
-							if ((OperatorRules.GetOperatorPriority(topOperation) > OperatorRules.GetOperatorPriority(curOperation)) ||
-								((OperatorRules.GetOperatorPriority(topOperation) == OperatorRules.GetOperatorPriority(curOperation)) &&
-								OperatorRules.IsOperatorLeftAssociative(topOperation)))
+							BinaryOperatorOperation topOperation = operatorStack.Peek();
+							if ((topOperation.Precedence > curOperation.Precedence)
+							|| (topOperation.Precedence == curOperation.Precedence) && topOperation.IsLeftAssociative)
 							{
 								PopOperatorAndPushResult(termStack, operatorStack);
 							}

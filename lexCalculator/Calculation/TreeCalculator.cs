@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using lexCalculator.Types;
+using lexCalculator.Types.TreeNodes;
+using lexCalculator.Types.Operations;
 
 namespace lexCalculator.Calculation
 {
@@ -14,17 +13,17 @@ namespace lexCalculator.Calculation
 		{
 			switch (topNode)
 			{
-				case UnknownVariableTreeNode vNode:
+				case UndefinedVariableTreeNode vNode:
 				{
 					throw new Exception(String.Format("Variable \"{0}\" is not defined", vNode.Name));
 				}
 
-				case UnknownFunctionTreeNode fNode:
+				case UndefinedFunctionTreeNode fNode:
 				{
 					throw new Exception(String.Format("Function \"{0}\" is not defined", fNode.Name));
 				}
 
-				case LiteralTreeNode lNode:
+				case NumberTreeNode lNode:
 				{
 					return lNode.Value;
 				}
@@ -44,7 +43,7 @@ namespace lexCalculator.Calculation
 					}
 
 					// note that we call that function with its own local parameters
-					return CalculateNode(functionTable[iNode.Index].TopNode, variableTable, functionTable, localParameters);
+					return CalculateNode(functionTable[iNode.Index].TopNode.Clone(), variableTable, functionTable, localParameters);
 				}
 
 				case VariableIndexTreeNode iNode:
@@ -56,7 +55,7 @@ namespace lexCalculator.Calculation
 				{
 					double operand = CalculateNode(uNode.Child, variableTable, functionTable, parameters);
 
-					return OperationImplementations.UnaryFunctions[uNode.Operation](operand);
+					return uNode.Operation.Function(operand);
 				}
 
 				case BinaryOperationTreeNode bNode:
@@ -64,7 +63,7 @@ namespace lexCalculator.Calculation
 					double leftOperand = CalculateNode(bNode.LeftChild, variableTable, functionTable, parameters);
 					double rightOperand = CalculateNode(bNode.RightChild, variableTable, functionTable, parameters);
 
-					return OperationImplementations.BinaryFunctions[bNode.Operation](leftOperand, rightOperand);
+					return bNode.Operation.Function(leftOperand, rightOperand);
 				}
 
 				default: throw new Exception("Unknown tree node");
@@ -83,17 +82,17 @@ namespace lexCalculator.Calculation
 
 			switch (topNode)
 			{
-				case UnknownVariableTreeNode vNode:
+				case UndefinedVariableTreeNode vNode:
 				{
 					throw new Exception(String.Format("Variable \"{0}\" is not defined", vNode.Name));
 				}
 
-				case UnknownFunctionTreeNode fNode:
+				case UndefinedFunctionTreeNode fNode:
 				{
 					throw new Exception(String.Format("Function \"{0}\" is not defined", fNode.Name));
 				}
 
-				case LiteralTreeNode lNode:
+				case NumberTreeNode lNode:
 				{
 					for (int i = 0; i < iterations; ++i)
 					{
@@ -139,7 +138,10 @@ namespace lexCalculator.Calculation
 				{
 					double[] operands = CalculateNodeMultiple(uNode.Child, variableTable, functionTable, parameters, freeValueBuffers);
 
-					OperationImplementations.UnaryArrayFunctions[uNode.Operation](operands, result);
+					for (int i = 0; i < result.Length; ++i)
+					{
+						result[i] = uNode.Operation.Function(operands[i]);
+					}
 					freeValueBuffers.Enqueue(operands);
 
 					return result;
@@ -150,7 +152,10 @@ namespace lexCalculator.Calculation
 					double[] leftOperands = CalculateNodeMultiple(bNode.LeftChild, variableTable, functionTable, parameters, freeValueBuffers);
 					double[] rightOperands = CalculateNodeMultiple(bNode.RightChild, variableTable, functionTable, parameters, freeValueBuffers);
 
-					OperationImplementations.BinaryArrayFunctions[bNode.Operation](leftOperands, rightOperands, result);
+					for (int i = 0; i < result.Length; ++i)
+					{
+						result[i] = bNode.Operation.Function(leftOperands[i], rightOperands[i]);
+					}
 					freeValueBuffers.Enqueue(leftOperands);
 					freeValueBuffers.Enqueue(rightOperands);
 

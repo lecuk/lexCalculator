@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using lexCalculator.Types;
+using lexCalculator.Types.TreeNodes;
+using lexCalculator.Types.Operations;
 
 namespace lexCalculator.Processing
 {
-	public class MyDifferentiator : IDiffertiator
+	public class DefaultDifferentiator : IDiffertiator
 	{
 		static readonly TreeNode X = new FunctionParameterTreeNode(0);
 		static readonly TreeNode dX = new FunctionParameterTreeNode(1);
@@ -18,22 +17,22 @@ namespace lexCalculator.Processing
 		{
 			// (-u)' = -1
 			{ UnaryOperation.Negative,
-				new LiteralTreeNode(-1)},
+				new NumberTreeNode(-1)},
 			
 			// sign'(u) = ({-1, 0, 1})' = 0
 			{ UnaryOperation.Sign,
-				new LiteralTreeNode(0)},
+				new NumberTreeNode(0)},
 			
 			// sin'(u) = u' * cos(u)
 			{ UnaryOperation.Sine,
-				new BinaryOperationTreeNode(BinaryOperation.Multiplication,
+				new BinaryOperationTreeNode(BinaryOperatorOperation.Multiplication,
 					dX,
 					new UnaryOperationTreeNode(UnaryOperation.Cosine,
 						X))},
 			
 			// cos'(u) = u' * (-sin(u))
 			{ UnaryOperation.Cosine,
-				new BinaryOperationTreeNode(BinaryOperation.Multiplication,
+				new BinaryOperationTreeNode(BinaryOperatorOperation.Multiplication,
 					dX,
 					new UnaryOperationTreeNode(UnaryOperation.Negative,
 						new UnaryOperationTreeNode(UnaryOperation.Sine,
@@ -41,28 +40,28 @@ namespace lexCalculator.Processing
 			
 			// tan'(u) = u' / cos(u)^2
 			{ UnaryOperation.Tangent,
-				new BinaryOperationTreeNode(BinaryOperation.Division,
+				new BinaryOperationTreeNode(BinaryOperatorOperation.Division,
 					dX,
-					new BinaryOperationTreeNode(BinaryOperation.Power,
+					new BinaryOperationTreeNode(BinaryOperatorOperation.Power,
 						new UnaryOperationTreeNode(UnaryOperation.Cosine,
 							X),
-						new LiteralTreeNode(2)))},
+						new NumberTreeNode(2)))},
 			
 			// cot'(u) = u' / (-sin(u)^2)
 			{ UnaryOperation.Cotangent,
-				new BinaryOperationTreeNode(BinaryOperation.Division,
+				new BinaryOperationTreeNode(BinaryOperatorOperation.Division,
 					dX,
 					new UnaryOperationTreeNode(UnaryOperation.Negative,
-						new BinaryOperationTreeNode(BinaryOperation.Power,
+						new BinaryOperationTreeNode(BinaryOperatorOperation.Power,
 							new UnaryOperationTreeNode(UnaryOperation.Sine,
 								X),
-							new LiteralTreeNode(2))))},
+							new NumberTreeNode(2))))},
 			
 			// sec'(u) = u' * sec(u)*tan(u)
 			{ UnaryOperation.Secant,
-				new BinaryOperationTreeNode(BinaryOperation.Multiplication,
+				new BinaryOperationTreeNode(BinaryOperatorOperation.Multiplication,
 					dX,
-					new BinaryOperationTreeNode(BinaryOperation.Multiplication,
+					new BinaryOperationTreeNode(BinaryOperatorOperation.Multiplication,
 						new UnaryOperationTreeNode(UnaryOperation.Secant,
 							X),
 						new UnaryOperationTreeNode(UnaryOperation.Tangent,
@@ -70,10 +69,10 @@ namespace lexCalculator.Processing
 
 			// csc'(u) = u' * (-csc(u)*cot(u))
 			{ UnaryOperation.Cosecant,
-				new BinaryOperationTreeNode(BinaryOperation.Multiplication,
+				new BinaryOperationTreeNode(BinaryOperatorOperation.Multiplication,
 					dX,
 					new UnaryOperationTreeNode(UnaryOperation.Negative,
-						new BinaryOperationTreeNode(BinaryOperation.Multiplication,
+						new BinaryOperationTreeNode(BinaryOperatorOperation.Multiplication,
 							new UnaryOperationTreeNode(UnaryOperation.Cosecant,
 								X),
 							new UnaryOperationTreeNode(UnaryOperation.Cotangent,
@@ -96,41 +95,48 @@ namespace lexCalculator.Processing
 
 			// (e^u)' = u' * e^u
 			{ UnaryOperation.Exponent,
-				new BinaryOperationTreeNode(BinaryOperation.Multiplication,
+				new BinaryOperationTreeNode(BinaryOperatorOperation.Multiplication,
 					dX,
 					new UnaryOperationTreeNode(UnaryOperation.Exponent,
 						X))},
 
 			// ln'(u) = u' / u
 			{ UnaryOperation.NaturalLogarithm,
-				new BinaryOperationTreeNode(BinaryOperation.Division,
+				new BinaryOperationTreeNode(BinaryOperatorOperation.Division,
 					dX,
 					X)},
 
 			// sqrt'(u) = u' / (2*sqrt(u))
 			{ UnaryOperation.SquareRoot,
-				new BinaryOperationTreeNode(BinaryOperation.Division,
+				new BinaryOperationTreeNode(BinaryOperatorOperation.Division,
 					dX,
-					new BinaryOperationTreeNode(BinaryOperation.Multiplication,
-						new LiteralTreeNode(2),
+					new BinaryOperationTreeNode(BinaryOperatorOperation.Multiplication,
+						new NumberTreeNode(2),
 						new UnaryOperationTreeNode(UnaryOperation.SquareRoot,
 							X)))},
 
 			// cbrt'(u) = u' / (3 * cbrt(u^2))
 			{ UnaryOperation.CubeRoot,
-				new BinaryOperationTreeNode(BinaryOperation.Division,
+				new BinaryOperationTreeNode(BinaryOperatorOperation.Division,
 					dX,
-					new BinaryOperationTreeNode(BinaryOperation.Multiplication,
-						new LiteralTreeNode(3),
+					new BinaryOperationTreeNode(BinaryOperatorOperation.Multiplication,
+						new NumberTreeNode(3),
 						new UnaryOperationTreeNode(UnaryOperation.CubeRoot,
-							new BinaryOperationTreeNode(BinaryOperation.Power,
+							new BinaryOperationTreeNode(BinaryOperatorOperation.Power,
 								X,
-								new LiteralTreeNode(2)))))},
+								new NumberTreeNode(2)))))},
+			
+			{ UnaryOperation.Floor,
+				new NumberTreeNode(0)},
+			
+			{ UnaryOperation.Ceiling,
+				new NumberTreeNode(0)},
+			
+			{ UnaryOperation.AbsoluteValue,
+				new UnaryOperationTreeNode(UnaryOperation.Sign,
+					X)},
 
 			/*
-			{ UnaryOperation.Floor,                 Math.Floor },
-			{ UnaryOperation.Ceiling,               Math.Ceiling },
-			{ UnaryOperation.AbsoluteValue,         Math.Abs },
 			{ UnaryOperation.Factorial,             MoreMath.Factorial }
 			*/
 		};
@@ -138,61 +144,61 @@ namespace lexCalculator.Processing
 		static readonly Dictionary<BinaryOperation, TreeNode> BinaryDifferential = new Dictionary<BinaryOperation, TreeNode>()
 		{
 			// (u + v)' = u' + v'
-			{ BinaryOperation.Addition,
-				new BinaryOperationTreeNode(BinaryOperation.Addition,
+			{ BinaryOperatorOperation.Addition,
+				new BinaryOperationTreeNode(BinaryOperatorOperation.Addition,
 					dX,
 					dY) },
 			
 			// (u - v)' = u' - v'
-			{ BinaryOperation.Substraction,
-				new BinaryOperationTreeNode(BinaryOperation.Substraction,
+			{ BinaryOperatorOperation.Substraction,
+				new BinaryOperationTreeNode(BinaryOperatorOperation.Substraction,
 					dX,
 					dY) },
 			
 			// (u * v)' = u'v + uv'
-			{ BinaryOperation.Multiplication,
-				new BinaryOperationTreeNode(BinaryOperation.Addition,
-					new BinaryOperationTreeNode(BinaryOperation.Multiplication,
+			{ BinaryOperatorOperation.Multiplication,
+				new BinaryOperationTreeNode(BinaryOperatorOperation.Addition,
+					new BinaryOperationTreeNode(BinaryOperatorOperation.Multiplication,
 						dX,
 						Y),
-					new BinaryOperationTreeNode(BinaryOperation.Multiplication,
+					new BinaryOperationTreeNode(BinaryOperatorOperation.Multiplication,
 						X,
 						dY)) },
 			
 			// (u / v)' = (u'v - uv') / (v * v)
-			{ BinaryOperation.Division,
-				new BinaryOperationTreeNode(BinaryOperation.Division,
-					new BinaryOperationTreeNode(BinaryOperation.Substraction,
-						new BinaryOperationTreeNode(BinaryOperation.Multiplication,
+			{ BinaryOperatorOperation.Division,
+				new BinaryOperationTreeNode(BinaryOperatorOperation.Division,
+					new BinaryOperationTreeNode(BinaryOperatorOperation.Substraction,
+						new BinaryOperationTreeNode(BinaryOperatorOperation.Multiplication,
 							dX,
 							Y),
-						new BinaryOperationTreeNode(BinaryOperation.Multiplication,
+						new BinaryOperationTreeNode(BinaryOperatorOperation.Multiplication,
 							X,
 							dY)),
-					new BinaryOperationTreeNode(BinaryOperation.Power,
+					new BinaryOperationTreeNode(BinaryOperatorOperation.Power,
 						Y,
-						new LiteralTreeNode(2))) },
+						new NumberTreeNode(2))) },
 			
 			// (u ^ v)' = (u ^ v) * ((v * u') / u + v' * ln(u)) 
-			{ BinaryOperation.Power,
-				new BinaryOperationTreeNode(BinaryOperation.Multiplication,
-					new BinaryOperationTreeNode(BinaryOperation.Power,
+			{ BinaryOperatorOperation.Power,
+				new BinaryOperationTreeNode(BinaryOperatorOperation.Multiplication,
+					new BinaryOperationTreeNode(BinaryOperatorOperation.Power,
 						X,
 						Y),
-					new BinaryOperationTreeNode(BinaryOperation.Addition,
-						new BinaryOperationTreeNode(BinaryOperation.Division,
-							new BinaryOperationTreeNode(BinaryOperation.Multiplication,
+					new BinaryOperationTreeNode(BinaryOperatorOperation.Addition,
+						new BinaryOperationTreeNode(BinaryOperatorOperation.Division,
+							new BinaryOperationTreeNode(BinaryOperatorOperation.Multiplication,
 								Y,
 								dX),
 							X),
-						new BinaryOperationTreeNode(BinaryOperation.Multiplication,
+						new BinaryOperationTreeNode(BinaryOperatorOperation.Multiplication,
 							dY,
 							new UnaryOperationTreeNode(UnaryOperation.NaturalLogarithm,
 								X)))) },
 			
 			// (u % v)' = 1 
-			{ BinaryOperation.Remainder,
-				new LiteralTreeNode(1) },
+			{ BinaryOperatorOperation.Remainder,
+				new NumberTreeNode(1) },
 		};
 
 		TreeNode ReplaceDifferentialArguments(TreeNode node, params TreeNode[] children)
@@ -229,20 +235,20 @@ namespace lexCalculator.Processing
 		{
 			switch (treeNode)
 			{
-				case LiteralTreeNode lTreeNode:
-					return new LiteralTreeNode(0, lTreeNode.Parent);
+				case NumberTreeNode lTreeNode:
+					return new NumberTreeNode(0, lTreeNode.Parent);
 
 				case VariableIndexTreeNode iTreeNode:
-					return new LiteralTreeNode(0, iTreeNode.Parent);
+					return new NumberTreeNode(0, iTreeNode.Parent);
 
 				case FunctionIndexTreeNode fiTreeNode:
 					throw new Exception("Remote functions are not supported");
 
 				case FunctionParameterTreeNode fpTreeNode:
 					if (fpTreeNode.Index == index)
-						return new LiteralTreeNode(1, fpTreeNode.Parent);
+						return new NumberTreeNode(1, fpTreeNode.Parent);
 					else
-						return new LiteralTreeNode(0, fpTreeNode.Parent);
+						return new NumberTreeNode(0, fpTreeNode.Parent);
 
 				case UnaryOperationTreeNode uTreeNode:
 					return MakeUnaryDifferential(uTreeNode, index);

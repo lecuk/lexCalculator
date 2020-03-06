@@ -66,7 +66,7 @@ namespace lexCalculator.Calculation
 		{
 			return Math.Pow(x, 0.3333333333333333333333);
 		}
-
+	
 		// using S.Ramanujan's factorial approximation formula
 		public static double Factorial(double x)
 		{
@@ -115,9 +115,23 @@ namespace lexCalculator.Calculation
 			return Math.Log(x) / Math.Log(p);
 		}
 
-		public static double Nrt(double p, double x)
+		public static double NthRoot(double p, double x)
 		{
 			return Math.Pow(x, 1.0 / p);
+		}
+
+		// stolen here because i am lazy to write my own function:
+		// https://www.sanfoundry.com/csharp-program-gcd/
+		public static double GCD(double x, double y)
+		{
+			while (y > 0.000001)
+			{
+				double rem = Math.IEEERemainder(x, y);
+				x = y;
+				y = rem;
+			}
+
+			return x;
 		}
 	}
 }

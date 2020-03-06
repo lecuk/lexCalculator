@@ -1,8 +1,9 @@
-﻿using lexCalculator.Types;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+
+using lexCalculator.Types;
+using lexCalculator.Types.Operations;
 
 namespace lexCalculator.Calculation
 {
@@ -52,8 +53,9 @@ namespace lexCalculator.Calculation
 						double operand = resultStack.Pop();
 
 						codeStream.Read(buffer, 0, sizeof(int));
-						UnaryOperation operation = (UnaryOperation)BitConverter.ToInt32(buffer, 0);
-						resultStack.Push(OperationImplementations.UnaryFunctions[operation](operand));
+						int id = BitConverter.ToInt32(buffer, 0);
+						UnaryOperation operation = (UnaryOperation)Operation.AllOperations[id];
+						resultStack.Push(operation.Function(operand));
 					}
 					break;
 
@@ -64,8 +66,9 @@ namespace lexCalculator.Calculation
 						double leftOperand = resultStack.Pop();
 
 						codeStream.Read(buffer, 0, sizeof(int));
-						BinaryOperation operation = (BinaryOperation)BitConverter.ToInt32(buffer, 0);
-						resultStack.Push(OperationImplementations.BinaryFunctions[operation](leftOperand, rightOperand));
+						int id = BitConverter.ToInt32(buffer, 0);
+						BinaryOperation operation = (BinaryOperation)Operation.AllOperations[id];
+						resultStack.Push(operation.Function(leftOperand, rightOperand));
 					}
 					break;
 
@@ -135,9 +138,13 @@ namespace lexCalculator.Calculation
 						double[] operands = resultStack.Pop();
 
 						codeStream.Read(buffer, 0, sizeof(int));
-						UnaryOperation operation = (UnaryOperation)BitConverter.ToInt32(buffer, 0);
+						int id = BitConverter.ToInt32(buffer, 0);
+						UnaryOperation operation = (UnaryOperation)Operation.AllOperations[id];
 
-						OperationImplementations.UnaryArrayFunctions[operation](operands, values);
+						for (int i = 0; i < values.Length; ++i)
+						{
+							values[i] = operation.Function(operands[i]);
+						}
 
 						// add free buffer to the queue
 						freeValueBuffers.Enqueue(operands);
@@ -151,9 +158,13 @@ namespace lexCalculator.Calculation
 						double[] leftOperands = resultStack.Pop();
 
 						codeStream.Read(buffer, 0, sizeof(int));
-						BinaryOperation operation = (BinaryOperation)BitConverter.ToInt32(buffer, 0);
+						int id = BitConverter.ToInt32(buffer, 0);
+						BinaryOperation operation = (BinaryOperation)Operation.AllOperations[id];
 
-						OperationImplementations.BinaryArrayFunctions[operation](leftOperands, rightOperands, values);
+						for (int i = 0; i < values.Length; ++i)
+						{
+							values[i] = operation.Function(leftOperands[i], rightOperands[i]);
+						}
 
 						// add free buffers to the queue
 						freeValueBuffers.Enqueue(rightOperands);

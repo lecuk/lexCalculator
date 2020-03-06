@@ -1,6 +1,6 @@
 ﻿namespace lexCalculator.Parsing
 {
-	public interface ITokenizer
+	public interface ILexer
     {
 		Token[] Tokenize(string expression);
     }

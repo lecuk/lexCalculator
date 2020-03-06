@@ -1,7 +1,7 @@
 ﻿using lexCalculator.Types;
 using System;
-using System.Collections.Generic;
 using System.IO;
+using lexCalculator.Types.TreeNodes;
 
 namespace lexCalculator.Linking
 {
@@ -18,13 +18,13 @@ namespace lexCalculator.Linking
 	 * 
 	 */
 
-	public class PostfixConvertor : IConvertor<PostfixFunction>
+	public class PostfixTranslator : ITranslator<PostfixFunction>
 	{
 		// this calculator can't work with remote functions, so it inserts function trees directly into code
 		void ConvertAndReplaceParameters(TreeNode node, IReadOnlyTable<FinishedFunction> functionTable, MemoryStream stream, TreeNode[] parameters)
 		{
 			// why rewrite old code?
-			MyLinker linker = new MyLinker();
+			DefaultLinker linker = new DefaultLinker();
 			node = linker.ReplaceParametersWithTreeNodes(node, parameters);
 		}
 
@@ -32,17 +32,17 @@ namespace lexCalculator.Linking
 		{
 			switch (node)
 			{
-				case UnknownVariableTreeNode vNode:
+				case UndefinedVariableTreeNode vNode:
 				{
 					throw new Exception(String.Format("Variable \"{0}\" is not defined", vNode.Name));
 				}
 
-				case UnknownFunctionTreeNode fNode:
+				case UndefinedFunctionTreeNode fNode:
 				{
 					throw new Exception(String.Format("Function \"{0}\" is not defined", fNode.Name));
 				}
 
-				case LiteralTreeNode lNode:
+				case NumberTreeNode lNode:
 				{
 					stream.WriteByte((byte)PostfixFunction.PostfixCommand.PushLiteral);
 					stream.Write(BitConverter.GetBytes(lNode.Value), 0, sizeof(double));
@@ -77,7 +77,7 @@ namespace lexCalculator.Linking
 					ConvertRecursion(uNode.Child, functionTable, stream);
 
 					stream.WriteByte((byte)PostfixFunction.PostfixCommand.CalculateUnary);
-					stream.Write(BitConverter.GetBytes((int)uNode.Operation), 0, sizeof(int));
+					stream.Write(BitConverter.GetBytes(uNode.Operation.Id), 0, sizeof(int));
 				}
 				break;
 
@@ -88,7 +88,7 @@ namespace lexCalculator.Linking
 					ConvertRecursion(bNode.RightChild, functionTable, stream);
 
 					stream.WriteByte((byte)PostfixFunction.PostfixCommand.CalculateBinary);
-					stream.Write(BitConverter.GetBytes((int)bNode.Operation), 0, sizeof(int));
+					stream.Write(BitConverter.GetBytes(bNode.Operation.Id), 0, sizeof(int));
 				}
 				break;
 			}

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace lexCalculator.Parsing
 {
-	public class MyTokenizer : ITokenizer
+	public class DefaultLexer : ILexer
 	{
 		Token GetSymbol(StringReader reader)
 		{
@@ -26,11 +26,11 @@ namespace lexCalculator.Parsing
 				if (peekResult == -1) break;
 				symbol = (char)peekResult;
 				
-				if (ParserRules.IsValidNumberChar(symbol, lastSymbol, pointWasPut, exponentSignWasPut, exponentWasPut))
+				if (ParseRules.IsValidNumberChar(symbol, lastSymbol, pointWasPut, exponentSignWasPut, exponentWasPut))
 				{
-					if (ParserRules.IsDecimalPointChar(symbol)) pointWasPut = true;
-					if (ParserRules.IsSignChar(symbol))  exponentSignWasPut = true;
-					if (ParserRules.IsExponentChar(symbol))  exponentWasPut = true;
+					if (ParseRules.IsDecimalPointChar(symbol)) pointWasPut = true;
+					if (ParseRules.IsSignChar(symbol))  exponentSignWasPut = true;
+					if (ParseRules.IsExponentChar(symbol))  exponentWasPut = true;
 
 					literalBuilder.Append(symbol);
 					lastSymbol = symbol;
@@ -38,7 +38,7 @@ namespace lexCalculator.Parsing
 					continue;
 				}
 
-				if (ParserRules.IsStopForIdentifierOrLiteralChar(symbol)) break;
+				if (ParseRules.IsStopForIdentifierOrLiteralChar(symbol)) break;
 
 				throw new ArgumentException(String.Format("Unexpected character in number token: \"{0}\"", symbol));
 			}
@@ -58,14 +58,14 @@ namespace lexCalculator.Parsing
 				if (peekResult == -1) break;
 				symbol = (char)peekResult;
 
-				if (ParserRules.IsValidIdentifierChar(symbol))
+				if (ParseRules.IsValidIdentifierChar(symbol))
 				{
 					identifierBuilder.Append(symbol);
 					reader.Read();
 					continue;
 				}
 
-				if (ParserRules.IsStopForIdentifierOrLiteralChar(symbol)) break;
+				if (ParseRules.IsStopForIdentifierOrLiteralChar(symbol)) break;
 
 				throw new ArgumentException(String.Format("Unexpected character in identifier token: \"{0}\"", symbol));
 			}
@@ -80,15 +80,15 @@ namespace lexCalculator.Parsing
 
 			char firstSymbol = (char)peekResult;
 
-			if (ParserRules.IsValidNumberFirstChar(firstSymbol))
+			if (ParseRules.IsValidNumberFirstChar(firstSymbol))
 			{
 				return GetNumber(reader);
 			}
-			if (ParserRules.IsValidIdentifierFirstChar(firstSymbol))
+			if (ParseRules.IsValidIdentifierFirstChar(firstSymbol))
 			{
 				return GetIdentifier(reader);
 			}
-			if (ParserRules.IsValidSymbolChar(firstSymbol))
+			if (ParseRules.IsValidSymbolChar(firstSymbol))
 			{
 				return GetSymbol(reader);
 			}

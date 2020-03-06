@@ -1,6 +1,7 @@
 ﻿using lexCalculator.Types;
 using lexCalculator.Static;
 using lexCalculator.Linking;
+using lexCalculator.Types.TreeNodes;
 using System;
 
 namespace lexCalculator.TestApp
@@ -30,13 +31,13 @@ namespace lexCalculator.TestApp
 
 			switch (node)
 			{
-				case LiteralTreeNode lTreeNode:
+				case NumberTreeNode lTreeNode:
 				{
 					Console.WriteLine(lTreeNode.Value.ToString("G7", System.Globalization.CultureInfo.InvariantCulture));
 				}
 				break;
 
-				case UnknownVariableTreeNode vTreeNode:
+				case UndefinedVariableTreeNode vTreeNode:
 				{
 					Console.ForegroundColor = ConsoleColor.Gray;
 					Console.WriteLine(vTreeNode.Name);
@@ -65,7 +66,7 @@ namespace lexCalculator.TestApp
 					if (recursivelyVisualiseFunctions)
 					{
 						TreeNode clone = functionTable[fiTreeNode.Index].TopNode.Clone();
-						MyLinker linker = new MyLinker();
+						DefaultLinker linker = new DefaultLinker();
 						clone = linker.ReplaceParametersWithTreeNodes(clone, fiTreeNode.Parameters);
 						
 						VisualizeAsTreeRecursion(clone, variableTable, functionTable, recursivelyVisualiseFunctions, colorStr);
@@ -83,7 +84,7 @@ namespace lexCalculator.TestApp
 				}
 				break;
 
-				case UnknownFunctionTreeNode fTreeNode:
+				case UndefinedFunctionTreeNode fTreeNode:
 				{
 					Console.ForegroundColor = ConsoleColor.Magenta;
 					Console.WriteLine(String.Format("{0}()", fTreeNode.Name));
@@ -98,7 +99,7 @@ namespace lexCalculator.TestApp
 				case UnaryOperationTreeNode uTreeNode:
 				{
 					Console.ForegroundColor = ConsoleColor.Red;
-					Console.WriteLine(String.Format("[{0}]", OperationFormats.UnaryOperationFormats[uTreeNode.Operation].ShortName));
+					Console.WriteLine(String.Format("[{0}]", uTreeNode.Operation.FunctionName));
 					Console.ResetColor();
 					VisualizeAsTreeRecursion(uTreeNode.Child, variableTable, functionTable, recursivelyVisualiseFunctions, colorStr + '1');
 					break;
@@ -107,7 +108,7 @@ namespace lexCalculator.TestApp
 				case BinaryOperationTreeNode bTreeNode:
 				{
 					Console.ForegroundColor = ConsoleColor.Yellow;
-					Console.WriteLine(String.Format("[{0}]", OperationFormats.BinaryOperationFormats[bTreeNode.Operation].ShortName));
+					Console.WriteLine(String.Format("[{0}]", bTreeNode.Operation.FunctionName));
 					Console.ResetColor();
 					VisualizeAsTreeRecursion(bTreeNode.LeftChild, variableTable, functionTable, recursivelyVisualiseFunctions, colorStr + '2');
 					VisualizeAsTreeRecursion(bTreeNode.RightChild, variableTable, functionTable, recursivelyVisualiseFunctions, colorStr + '2');
@@ -128,14 +129,14 @@ namespace lexCalculator.TestApp
 		{
 			switch (node)
 			{
-				case LiteralTreeNode lTreeNode:
+				case NumberTreeNode lTreeNode:
 				{
 					Console.Write(lTreeNode.Value.ToString("G6", System.Globalization.CultureInfo.InvariantCulture));
 					Console.Write(' ');
 					break;
 				}
 
-				case UnknownVariableTreeNode vTreeNode:
+				case UndefinedVariableTreeNode vTreeNode:
 				{
 					Console.Write(vTreeNode.Name);
 					Console.Write(' ');
@@ -156,7 +157,7 @@ namespace lexCalculator.TestApp
 					break;
 				}
 
-				case UnknownFunctionTreeNode fTreeNode:
+				case UndefinedFunctionTreeNode fTreeNode:
 				{
 					Console.Write(fTreeNode.Name);
 					Console.Write(' ');
@@ -169,7 +170,7 @@ namespace lexCalculator.TestApp
 
 				case UnaryOperationTreeNode uTreeNode:
 				{
-					Console.Write(OperationFormats.UnaryOperationFormats[uTreeNode.Operation].ShortName);
+					Console.Write(uTreeNode.Operation.FunctionName);
 					Console.Write(' ');
 					VisualizeAsPrefixEquation(uTreeNode.Child);
 					break;
@@ -177,7 +178,7 @@ namespace lexCalculator.TestApp
 
 				case BinaryOperationTreeNode bTreeNode:
 				{
-					Console.Write(OperationFormats.BinaryOperationFormats[bTreeNode.Operation].ShortName);
+					Console.Write(bTreeNode.Operation.FunctionName);
 					Console.Write(' ');
 					VisualizeAsPrefixEquation(bTreeNode.LeftChild);
 					VisualizeAsPrefixEquation(bTreeNode.RightChild);
@@ -190,14 +191,14 @@ namespace lexCalculator.TestApp
 		{
 			switch (node)
 			{
-				case LiteralTreeNode lTreeNode:
+				case NumberTreeNode lTreeNode:
 				{
 					Console.Write(lTreeNode.Value.ToString("0.####", System.Globalization.CultureInfo.InvariantCulture));
 					Console.Write(' ');
 					break;
 				}
 
-				case UnknownVariableTreeNode vTreeNode:
+				case UndefinedVariableTreeNode vTreeNode:
 				{
 					Console.Write(vTreeNode.Name);
 					Console.Write(' ');
@@ -218,7 +219,7 @@ namespace lexCalculator.TestApp
 					break;
 				}
 
-				case UnknownFunctionTreeNode fTreeNode:
+				case UndefinedFunctionTreeNode fTreeNode:
 				{
 					foreach (TreeNode child in fTreeNode.Parameters)
 					{
@@ -232,7 +233,7 @@ namespace lexCalculator.TestApp
 				case UnaryOperationTreeNode uTreeNode:
 				{
 					VisualizeAsPostfixEquation(uTreeNode.Child);
-					Console.Write(OperationFormats.UnaryOperationFormats[uTreeNode.Operation].ShortName);
+					Console.Write(uTreeNode.Operation.FunctionName);
 					Console.Write(' ');
 					break;
 				}
@@ -241,7 +242,7 @@ namespace lexCalculator.TestApp
 				{
 					VisualizeAsPostfixEquation(bTreeNode.LeftChild);
 					VisualizeAsPostfixEquation(bTreeNode.RightChild);
-					Console.Write(OperationFormats.BinaryOperationFormats[bTreeNode.Operation].ShortName);
+					Console.Write(bTreeNode.Operation.FunctionName);
 					Console.Write(' ');
 					break;
 				}

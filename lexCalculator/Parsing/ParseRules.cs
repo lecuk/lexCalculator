@@ -2,7 +2,7 @@
 
 namespace lexCalculator.Parsing
 {
-	public static class ParserRules
+	public static class ParseRules
 	{
 		public static bool IsDecimalPointChar(char symbol)
 		{

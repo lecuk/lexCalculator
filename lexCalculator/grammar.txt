@@ -1,49 +1,15 @@
-identifier:
-  "x" 
-  "y123" 
-  "h3ll0" 
-  "f_u_n_c_t_i_o_n" 
-  "_0123456789"
+letter ::= 'a' | 'b' | ... | 'z' | 'A' | 'B' | ... | 'Z'
+digit ::= '0' | '1' | ... | '9'
 
-number:
-  "0"
-  ".2"
-  "1.0"
-  "132456793484736"
-  "6.2e5"
-  "1.2E-3"
-  "5.0000025324e+12"
+identifier ::= letter | '_' { letter | '_' | digit }
+number ::= {digit} '.' digit {digit} ['e'] | digit {digit}, ['.' {digit}], 'e'
 
-variable:
-  identifier
+variable ::= identifier
 
-binary_operator:
-  '+'
-  '-'
-  '*'
-  '/'
-  '^'
-  '%'
+binary_operator ::= '+' | '-' | '*' | '/' | '^' | '%'
+  
+expression ::= term {binary_operator term}
 
-expression:
-  term
-  term binary_operator term ...
+function ::= identifier '(' [expression] ')' | identifier '(' expression { ',' expression } ')'
 
-function:
-  identifier()
-  identifier'()
-  identifier(expression)
-  identifier'(expression)
-  identifier(expression, ...)
-  identifier'(expression, ...)
-
-term:
-  (expression)
-  |expression|
-  number
-  variable
-  function
-  +term
-  -term
-  term!
-  term'
+term ::= '(' expression ')' | '|' expression '|' | number | variable | function | '+' term | '-' term | term '!'
