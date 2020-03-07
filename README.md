@@ -23,7 +23,7 @@ class Program
     {
         ILexer lexer = new DefaultLexer();
         IParser parser = new DefaultParser();
-        ILinker linker = new DefaultLinker(true, false);
+        ILinker linker = new DefaultLinker();
         ICalculator<FinishedFunction> calculator = new TreeCalculator();
    
         CalculationContext userContext = new CalculationContext();
