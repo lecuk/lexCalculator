@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace lexCalculator.Types.TreeNodes
 {
-	public class NumberTreeNode : TreeNode
+	public sealed class NumberTreeNode : TreeNode
 	{
 		public double Value { get; set; }
 		public override bool HasChildren => false;

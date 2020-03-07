@@ -16,10 +16,10 @@ namespace lexCalculator.TestApp
 		static readonly Random rand = new Random();
 		static readonly ExpressionVisualizer visualizer = new ExpressionVisualizer();
 
-		static readonly ILexer tokenizer = new DefaultLexer();
-		static readonly IParser constructor = new DefaultParser();
-		static readonly ILinker linker = new DefaultLinker(true);
-		static readonly ITranslator<PostfixFunction> convertor = new PostfixTranslator();
+		static readonly ILexer lexer = new DefaultLexer();
+		static readonly IParser parser = new DefaultParser();
+		static readonly ILinker linker = new DefaultLinker(true, false);
+		static readonly ITranslator<PostfixFunction> translator = new PostfixTranslator();
 		static readonly ICalculator<PostfixFunction> postfixCalculator = new PostfixCalculator();
 		static readonly ICalculator<FinishedFunction> treeCalculator = new TreeCalculator();
 		static readonly IOptimizer optimizer = new DefaultOptimizer(2);
@@ -75,16 +75,16 @@ namespace lexCalculator.TestApp
 				}
 				else throw new Exception("Invalid function definition");
 			}
-			Token[] tokens = tokenizer.Tokenize(expressionInput);
-			TreeNode tree = constructor.Construct(tokens);
+			Token[] tokens = lexer.Tokenize(expressionInput);
+			TreeNode tree = parser.Construct(tokens);
 			FinishedFunction function = linker.BuildFunction(tree, context, parameterNames);
 			context.FunctionTable.AssignItem(fDefinition.Name, function);
 		}
 
 		static void DefineVariableInput(UndefinedVariableTreeNode vDefinition, string expressionInput, CalculationContext context)
 		{
-			Token[] tokens = tokenizer.Tokenize(expressionInput);
-			TreeNode tree = constructor.Construct(tokens);
+			Token[] tokens = lexer.Tokenize(expressionInput);
+			TreeNode tree = parser.Construct(tokens);
 			FinishedFunction function = linker.BuildFunction(tree, context, new string[0]);
 			double value = treeCalculator.Calculate(function);
 
@@ -93,8 +93,8 @@ namespace lexCalculator.TestApp
 
 		static void CalculateInput(string expressionInput, CalculationContext context)
 		{
-			Token[] tokens = tokenizer.Tokenize(expressionInput);
-			TreeNode tree = constructor.Construct(tokens);
+			Token[] tokens = lexer.Tokenize(expressionInput);
+			TreeNode tree = parser.Construct(tokens);
 			FinishedFunction function = linker.BuildFunction(tree, context, new string[0]);
 			double value = treeCalculator.Calculate(function);
 			
@@ -132,7 +132,7 @@ namespace lexCalculator.TestApp
 		{
 			string funcName = input.Substring(6).Trim(' ');
 			FinishedFunction function = context.FunctionTable[funcName];
-			PostfixFunction postfixFunction = convertor.Convert(function);
+			PostfixFunction postfixFunction = translator.Convert(function);
 			Console.WriteLine("Testing functionality: ");
 			TestCalculator(postfixCalculator, postfixFunction, context.VariableTable, function.ParameterCount, 10, 1, true);
 			TestCalculator(treeCalculator, function, context.VariableTable, function.ParameterCount, 10, 1, true);
@@ -244,6 +244,7 @@ namespace lexCalculator.TestApp
 							printCommand("help", "this command", new string[0]);
 							printCommand("summary", "prints what functions does your library have", new string[0]);
 							printCommand("library", "prints all trees of all functions in your library", new string[0]);
+							printCommand("lexer", "divides expression into tokens, that's all", new string[] { "expr" });
 							printCommand("tree", "prints function tree", new string[] { "func" });
 							printCommand("test", "test function with random parameters for correctness and effectiveness", new string[] { "func" });
 							printCommand("optimize", "look how your function can be optimized", new string[] { "func" });
@@ -269,6 +270,26 @@ namespace lexCalculator.TestApp
 						{
 							string funcName = input.Substring(6).Trim(' ');
 							visualizer.VisualizeAsTree(userContext.FunctionTable[funcName].TopNode, userContext);
+							continue;
+						}
+
+						if (input.StartsWith("~lexer "))
+						{
+							string expression = input.Substring(7).Trim(' ');
+							Token[] tokens = lexer.Tokenize(expression);
+							Console.Write("Tokens: [ ");
+							foreach (Token token in tokens)
+							{
+								switch (token)
+								{
+									case NumberToken _: Console.ForegroundColor = ConsoleColor.White; break;
+									case SymbolToken _: Console.ForegroundColor = ConsoleColor.Yellow; break;
+									case IdentifierToken _: Console.ForegroundColor = ConsoleColor.Cyan; break;
+								}
+								Console.Write("{0} ", token.ToString());
+								Console.ResetColor();
+							}
+							Console.WriteLine("]\n");
 							continue;
 						}
 
@@ -313,8 +334,8 @@ namespace lexCalculator.TestApp
 						expressionString = input.Substring(equalsPos + 1);
 						string identifierString = input.Substring(0, equalsPos);
 
-						Token[] firstHalfTokens = tokenizer.Tokenize(identifierString);
-						firstHalfTree = constructor.Construct(firstHalfTokens);
+						Token[] firstHalfTokens = lexer.Tokenize(identifierString);
+						firstHalfTree = parser.Construct(firstHalfTokens);
 
 						switch (firstHalfTree)
 						{

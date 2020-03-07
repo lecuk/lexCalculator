@@ -89,7 +89,7 @@ namespace lexCalculator.Processing
 				default: break;
 			}
 
-			checkFunction(node, variableTable);
+			node = checkFunction(node, variableTable);
 		}
 
 		TreeNode CalculateConstant(TreeNode node, IReadOnlyTable<double> variableTable)

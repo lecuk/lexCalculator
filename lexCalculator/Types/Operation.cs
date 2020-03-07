@@ -14,8 +14,9 @@ namespace lexCalculator.Types
 			Variable
 		}
 
-		private static int lastId = 0;
-
+		private static readonly List<Operation> allOperations = new List<Operation>();
+		public static readonly IReadOnlyList<Operation> AllOperations = allOperations;
+		
 		public readonly int Id;
 		public readonly ArgumentType Type;
 		public readonly string FunctionName;
@@ -37,8 +38,8 @@ namespace lexCalculator.Types
 			SpecialFormat = specialFormat;
 			ChildrenInSpecialFormatMayNeedBrackets = (specialFormat != null) ? childrenInSpecialFormatMayNeedBrackets : false;
 
-			Id = lastId;
-			++lastId;
+			Id = allOperations.Count;
+			allOperations.Add(this);
 		}
 
 		public bool Equals(Operation operation)
