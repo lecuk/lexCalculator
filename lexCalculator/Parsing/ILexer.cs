@@ -1,4 +1,6 @@
-﻿namespace lexCalculator.Parsing
+﻿using lexCalculator.Types;
+
+namespace lexCalculator.Parsing
 {
 	public interface ILexer
     {

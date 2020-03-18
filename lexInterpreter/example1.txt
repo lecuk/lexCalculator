@@ -1,13 +1,13 @@
-﻿@variables
-x = 0
+﻿x = 0
 y = 0
 
-@functions
 square(x) = x^2
 length2d(x, y) = sqrt(square(x) + square(y))
 
 // returns length of a vector
-@code
-~input(x)
-~input(y)
-~output(length2d(x, y))
+~output "Enter x"
+~input x
+~output "Enter y"
+~input y
+~output "length of vector {x, y}"
+~output length2d(x, y)

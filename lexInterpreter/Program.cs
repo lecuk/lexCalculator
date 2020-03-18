@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using lexCalculator.Calculation;
 using lexCalculator.Linking;
@@ -10,123 +11,97 @@ namespace lexInterpreter
 {
 	class Program
 	{
-		static ILexer tokenizer = new DefaultLexer();
-		static IParser constructor = new DefaultParser();
-		static ILinker linker = new DefaultLinker();
-		static ITranslator<PostfixFunction> convertor = new PostfixTranslator();
-		static ICalculator<PostfixFunction> postfixCalculator = new PostfixCalculator();
-		static ICalculator<FinishedFunction> treeCalculator = new TreeCalculator();
+		static StatementLexer lexer = new StatementLexer();
+		static StatementParser parser = new StatementParser();
+		static ExecutionContext context = new ExecutionContext(
+			StandardLibrary.GenerateStandardContext(),
+			new ExpressionLexer(),
+			new DefaultParser(),
+			new DefaultLinker(true),
+			new TreeCalculator());
 
-		static void DefineFunctionInput(UndefinedFunctionTreeNode fDefinition, string expressionInput, CalculationContext context)
-		{
-			string[] parameterNames = new string[fDefinition.Parameters.Length];
-			for (int i = 0; i < parameterNames.Length; ++i)
-			{
-				if (fDefinition.Parameters[i] is UndefinedVariableTreeNode vTreeNode)
-				{
-					parameterNames[i] = vTreeNode.Name;
-				}
-				else throw new Exception("Invalid function definition");
-			}
-			Token[] tokens = tokenizer.Tokenize(expressionInput);
-			TreeNode tree = constructor.Construct(tokens);
-			FinishedFunction function = linker.BuildFunction(tree, context, parameterNames);
-			context.FunctionTable.AssignItem(fDefinition.Name, function);
-			Console.WriteLine(String.Format("def {0} = {1}", fDefinition, tree));
-		}
-
-		static void DefineVariableInput(UndefinedVariableTreeNode vDefinition, string expressionInput, CalculationContext context)
-		{
-			Token[] tokens = tokenizer.Tokenize(expressionInput);
-			TreeNode tree = constructor.Construct(tokens);
-			FinishedFunction function = linker.BuildFunction(tree, context, new string[0]);
-			double value = treeCalculator.Calculate(function);
-
-			context.VariableTable.AssignItem(vDefinition.Name, value);
-			Console.WriteLine(String.Format("var {0} = {1} = {2}", vDefinition.Name, tree, value.ToString("G", System.Globalization.CultureInfo.InvariantCulture)));
-		}
-
-		static void CalculateInput(string expressionInput, CalculationContext context)
-		{
-			Token[] tokens = tokenizer.Tokenize(expressionInput);
-			TreeNode tree = constructor.Construct(tokens);
-			FinishedFunction function = linker.BuildFunction(tree, context, new string[0]);
-			double value = treeCalculator.Calculate(function);
-
-			Console.WriteLine(String.Format("{0} = {1}", expressionInput, value.ToString("G", System.Globalization.CultureInfo.InvariantCulture)));
-		}
-
-		static bool CheckLibraryImportString(string directoryPath, string line, CalculationContext context)
-		{
-			if (!line.StartsWith("~")) return false;
-
-			string libraryPath = line.Substring(1);
-			if (libraryPath == "standard")
-			{
-				context.AssignContext(StandardLibrary.GenerateStandardContext());
-			}
-			else RunFile(String.Format("{0}/{1}", directoryPath, libraryPath), context, false, true);
-
-			return true;
-		}
-		
+		// C:\Users\Asus\source\repos\lexCalculator\lexInterpreter\example2.txt
 		static int RunFile(string path, CalculationContext context, bool allowCalculations, bool allowDefinitions)
 		{
 			string[] lines = File.ReadAllLines(path);
+			List<Token[]> tokenLines = new List<Token[]>();
 			for (int i = 0; i < lines.Length; ++i)
 			{
 				string fullLine = lines[i];
 				string line = fullLine;
 				try
 				{
+					if (String.IsNullOrWhiteSpace(line)) continue;
+
 					int commentIndex = fullLine.IndexOf("//");
 					if (commentIndex > 0)
 					{
 						line = fullLine.Substring(0, commentIndex);
 					}
-
-					if (String.IsNullOrWhiteSpace(line)) continue;
-
-					if (CheckLibraryImportString(Directory.GetParent(path).FullName, line, context)) continue;
-
-					string expressionString = line;
-					TreeNode firstHalfTree = null;
-					int equalsPos = line.IndexOf('=');
-					if (equalsPos > 0)
-					{
-						if (!allowDefinitions) throw new Exception("Definitions are not allowed");
-
-						expressionString = fullLine.Substring(equalsPos + 1);
-						string identifierString = line.Substring(0, equalsPos);
-
-						Token[] firstHalfTokens = tokenizer.Tokenize(identifierString);
-						firstHalfTree = constructor.Construct(firstHalfTokens);
-
-						switch (firstHalfTree)
-						{
-							case UndefinedFunctionTreeNode fDefinition:
-								DefineFunctionInput(fDefinition, expressionString, context);
-								break;
-
-							case UndefinedVariableTreeNode vDefinition:
-								DefineVariableInput(vDefinition, expressionString, context);
-								break;
-
-							default: throw new Exception("Unknown syntax");
-						}
-					}
-					else
-					{
-						if (!allowCalculations) throw new Exception("Calculations are not allowed");
-
-						CalculateInput(line, context);
-					}
+					else if (commentIndex == 0) continue; 
+					
+					tokenLines.Add(lexer.Tokenize(line));
 				}
 				catch (Exception ex)
 				{
-					Console.WriteLine("Error during file \"{0}\" parsing: {1}", path, ex.Message);
+					Console.WriteLine("Error during file \"{0}\" lexing: {1}", path, ex.Message);
 					Console.WriteLine("Line {0}: {1}", i, fullLine);
 					return 3;
+				}
+			}
+
+			/* PRINT TOKENS FOR DEBUG
+			foreach (var tokenLine in tokenLines)
+			{
+				Console.Write("[ ");
+				foreach (var token in tokenLine)
+				{
+					Console.Write("{0} ", token);
+				}
+				Console.WriteLine("]");
+			}
+			*/
+
+			Statement[] statements = new Statement[0];
+
+			try
+			{
+				statements = parser.ParseLines(tokenLines.ToArray());
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine("Error during file \"{0}\" parsing: {1}", path, ex.Message);
+				return 4;
+			}
+
+			foreach (Statement statement in statements)
+			{
+				try
+				{
+					statement.Prepare();
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine("Error during file \"{0}\" preparing: {1}", path, ex.Message);
+					return 5;
+				}
+			}
+
+			foreach (Statement statement in statements)
+			{
+				try
+				{
+					statement.Execute();
+				}
+				catch (ExitStatement.ExitException)
+				{
+					Console.WriteLine("Program finished.");
+					return 0;
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine("Error during file \"{0}\" executing: {1}", path, ex.Message);
+					return 6;
 				}
 			}
 

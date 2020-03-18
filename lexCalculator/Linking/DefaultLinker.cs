@@ -78,6 +78,12 @@ namespace lexCalculator.Linking
 					bTree.RightChild = LinkTree(bTree.RightChild, context, parameterNames);
 					return bTree;
 
+				case TernaryOperationTreeNode bTree:
+					bTree.LeftChild = LinkTree(bTree.LeftChild, context, parameterNames);
+					bTree.MiddleChild = LinkTree(bTree.MiddleChild, context, parameterNames);
+					bTree.RightChild = LinkTree(bTree.RightChild, context, parameterNames);
+					return bTree;
+
 				case UndefinedFunctionTreeNode fTree:
 					return LinkUndefinedFunction(fTree, context, parameterNames);
 

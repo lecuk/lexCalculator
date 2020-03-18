@@ -66,6 +66,15 @@ namespace lexCalculator.Calculation
 					return bNode.Operation.Function(leftOperand, rightOperand);
 				}
 
+				case TernaryOperationTreeNode tNode:
+				{
+					double leftOperand = CalculateNode(tNode.LeftChild, variableTable, functionTable, parameters);
+					double middleOperand = CalculateNode(tNode.MiddleChild, variableTable, functionTable, parameters);
+					double rightOperand = CalculateNode(tNode.RightChild, variableTable, functionTable, parameters);
+
+					return tNode.Operation.Function(leftOperand, middleOperand, rightOperand);
+				}
+
 				default: throw new Exception("Unknown tree node");
 			}
 		}
@@ -157,6 +166,23 @@ namespace lexCalculator.Calculation
 						result[i] = bNode.Operation.Function(leftOperands[i], rightOperands[i]);
 					}
 					freeValueBuffers.Enqueue(leftOperands);
+					freeValueBuffers.Enqueue(rightOperands);
+
+					return result;
+				}
+				
+				case TernaryOperationTreeNode tNode:
+				{
+					double[] leftOperands = CalculateNodeMultiple(tNode.LeftChild, variableTable, functionTable, parameters, freeValueBuffers);
+					double[] middleOperands = CalculateNodeMultiple(tNode.MiddleChild, variableTable, functionTable, parameters, freeValueBuffers);
+					double[] rightOperands = CalculateNodeMultiple(tNode.RightChild, variableTable, functionTable, parameters, freeValueBuffers);
+
+					for (int i = 0; i < result.Length; ++i)
+					{
+						result[i] = tNode.Operation.Function(leftOperands[i], middleOperands[i], rightOperands[i]);
+					}
+					freeValueBuffers.Enqueue(leftOperands);
+					freeValueBuffers.Enqueue(middleOperands);
 					freeValueBuffers.Enqueue(rightOperands);
 
 					return result;

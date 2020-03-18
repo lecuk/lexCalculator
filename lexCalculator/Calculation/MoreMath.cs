@@ -6,6 +6,16 @@ namespace lexCalculator.Calculation
 {
 	public static class MoreMath
 	{
+		public static bool IsTrue(double x)
+		{
+			return (x != 0);
+		}
+
+		public static double Not(double x)
+		{
+			return Double.IsNaN(x) ? x : (IsTrue(x)) ? 1 : 0;
+		}
+
 		public static double Negative(double x)
 		{
 			return -x;
@@ -120,6 +130,16 @@ namespace lexCalculator.Calculation
 			return Math.Pow(x, 1.0 / p);
 		}
 
+		public static double TernaryConditional(double c, double x, double y)
+		{
+			return IsTrue(x) ? x : y;
+		}
+
+		public static double TernaryRange(double a, double x, double b)
+		{
+			return (x >= a && x <= b) ? 1 : 0;
+		}
+
 		// stolen here because i am lazy to write my own function:
 		// https://www.sanfoundry.com/csharp-program-gcd/
 		public static double GCD(double x, double y)
@@ -132,6 +152,51 @@ namespace lexCalculator.Calculation
 			}
 
 			return x;
+		}
+		
+		public static double More(double x, double y)
+		{
+			return (x > y) ? 1 : 0;
+		}
+
+		public static double Less(double x, double y)
+		{
+			return (x < y) ? 1 : 0;
+		}
+
+		public static double And(double a, double b)
+		{
+			return (IsTrue(a) && IsTrue(b)) ? 1 : 0;
+		}
+
+		public static double Or(double a, double b)
+		{
+			return (IsTrue(a) || IsTrue(b)) ? 1 : 0;
+		}
+
+		public static double MoreOrEqual(double x, double y)
+		{
+			return (x >= y) ? 1 : 0;
+		}
+
+		public static double Xor(double a, double b)
+		{
+			return (IsTrue(a) ^ IsTrue(b)) ? 1 : 0;
+		}
+
+		public static double LessOrEqual(double x, double y)
+		{
+			return (x <= y) ? 1 : 0;
+		}
+
+		public static double Equal(double x, double y)
+		{
+			return (x == y) ? 1 : 0;
+		}
+
+		public static double NotEqual(double x, double y)
+		{
+			return (x != y) ? 1 : 0;
 		}
 	}
 }

@@ -72,6 +72,20 @@ namespace lexCalculator.Calculation
 					}
 					break;
 
+					case PostfixFunction.PostfixCommand.CalculateTernary:
+					{
+						// pop in reverse order!
+						double rightOperand = resultStack.Pop();
+						double middleOperand = resultStack.Pop();
+						double leftOperand = resultStack.Pop();
+
+						codeStream.Read(buffer, 0, sizeof(int));
+						int id = BitConverter.ToInt32(buffer, 0);
+						TernaryOperation operation = (TernaryOperation)Operation.AllOperations[id];
+						resultStack.Push(operation.Function(leftOperand, middleOperand, rightOperand));
+					}
+					break;
+
 					default: throw new Exception("Unknown command");
 				}
 			}
@@ -169,6 +183,28 @@ namespace lexCalculator.Calculation
 						// add free buffers to the queue
 						freeValueBuffers.Enqueue(rightOperands);
 						freeValueBuffers.Enqueue(leftOperands);
+					}
+					break;
+
+					case PostfixFunction.PostfixCommand.CalculateTernary:
+					{
+						// pop in reverse order!
+						double[] rightOperands = resultStack.Pop();
+						double[] middleOperands = resultStack.Pop();
+						double[] leftOperands = resultStack.Pop();
+
+						codeStream.Read(buffer, 0, sizeof(int));
+						int id = BitConverter.ToInt32(buffer, 0);
+						TernaryOperation operation = (TernaryOperation)Operation.AllOperations[id];
+
+						for (int i = 0; i < values.Length; ++i)
+						{
+							values[i] = operation.Function(leftOperands[i], middleOperands[i], rightOperands[i]);
+						}
+
+						freeValueBuffers.Enqueue(leftOperands);
+						freeValueBuffers.Enqueue(middleOperands);
+						freeValueBuffers.Enqueue(rightOperands);
 					}
 					break;
 				}

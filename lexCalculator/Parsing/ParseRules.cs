@@ -16,32 +16,12 @@ namespace lexCalculator.Parsing
 
 		public static bool IsSignChar(char symbol)
 		{
-			return (symbol == '+' || symbol == '-');
-		}
-		
-		public static bool IsBracketChar(char symbol)
-		{
-			return ((symbol == '(')|| (symbol == ')') || (symbol == '|'));
-		}
-
-		public static bool IsBinaryOperatorChar(char symbol)
-		{
-			switch (symbol)
-			{
-				case '+':
-				case '-':
-				case '*':
-				case '/':
-				case '^':
-				case '%':
-					return true;
-			}
-			return false;
+			return (symbol == '+') || (symbol == '-');
 		}
 		
 		public static bool IsValidNumberFirstChar(char symbol)
 		{
-			return (Char.IsDigit(symbol) || IsDecimalPointChar(symbol));
+			return Char.IsDigit(symbol) || IsDecimalPointChar(symbol);
 		}
 
 		public static bool IsValidNumberChar(char symbol, char lastSymbol, bool pointWasPut, bool exponentSignWasPut, bool exponentWasPut)
@@ -65,8 +45,15 @@ namespace lexCalculator.Parsing
 
 		public static bool IsValidSymbolChar(char symbol)
 		{
-			const string allSymbols = "+-*/^%!()|,";
+			const string allSymbols = "+-*/^%!()|,?:=><{}";
 			return (allSymbols.IndexOf(symbol) != -1);
+		}
+
+		// for example, + can be paired with = to make +=
+		public static bool SymbolCanBePairedForAnotherSymbolToken(char symbol)
+		{
+			const string symbols = "+-*/^%!=><";
+			return (symbols.IndexOf(symbol) != -1);
 		}
 
 		public static bool IsStopForIdentifierOrLiteralChar(char symbol)

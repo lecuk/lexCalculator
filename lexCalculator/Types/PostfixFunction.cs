@@ -7,7 +7,7 @@ namespace lexCalculator.Types
 	{
 		public enum PostfixCommand
 		{
-			End, PushLiteral, PushVariable, PushParameter, CalculateUnary, CalculateBinary
+			End, PushLiteral, PushVariable, PushParameter, CalculateUnary, CalculateBinary, CalculateTernary
 		}
 
 		private readonly byte[] Code;

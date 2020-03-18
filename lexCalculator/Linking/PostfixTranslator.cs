@@ -91,6 +91,18 @@ namespace lexCalculator.Linking
 					stream.Write(BitConverter.GetBytes(bNode.Operation.Id), 0, sizeof(int));
 				}
 				break;
+
+				case TernaryOperationTreeNode tNode:
+				{
+					// push in normal order, pop in reverse!
+					ConvertRecursion(tNode.LeftChild, functionTable, stream);
+					ConvertRecursion(tNode.MiddleChild, functionTable, stream);
+					ConvertRecursion(tNode.RightChild, functionTable, stream);
+
+					stream.WriteByte((byte)PostfixFunction.PostfixCommand.CalculateTernary);
+					stream.Write(BitConverter.GetBytes(tNode.Operation.Id), 0, sizeof(int));
+				}
+				break;
 			}
 		}
 

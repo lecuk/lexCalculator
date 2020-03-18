@@ -1,13 +1,18 @@
-﻿@variables
-x = 0
-y = 0
+﻿// ~import "lib1.txt"
 
-@functions
-square(x) = x^2
-length2d(x, y) = sqrt(square(x) + square(y))
+i = 10
 
-// returns length of a vector
-@code
-~input(x)
-~input(y)
-~output(length2d(x, y))
+// countdown
+
+~if i <= 0 
+{
+	~output "Error"
+	~exit
+}
+
+
+~while i > 0
+{
+	~output i
+	i -= 1 // blabla blah
+}

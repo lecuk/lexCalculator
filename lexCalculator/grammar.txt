@@ -2,14 +2,44 @@ letter ::= 'a' | 'b' | ... | 'z' | 'A' | 'B' | ... | 'Z'
 digit ::= '0' | '1' | ... | '9'
 
 identifier ::= letter | '_' { letter | '_' | digit }
-number ::= {digit} '.' digit {digit} ['e'] | digit {digit}, ['.' {digit}], 'e'
+number ::= {digit} '.' digit {digit} ['e'] digit {digit} | digit {digit} ['.' {digit}] 'e' digit {digit}
 
 variable ::= identifier
 
 binary_operator ::= '+' | '-' | '*' | '/' | '^' | '%'
-  
+
+string :: '"' { * } '"'
+
+// statement is available only in lexInterpreter
+statement ::= 
+	function '=' expression			|
+	variable '=' expression			|
+	variable '+=' expression		|
+	variable '-=' expression		|
+	variable '*=' expression		|
+	variable '/=' expression		|
+	variable '^=' expression		|
+	variable '%=' expression		|
+	'~input' variable				|
+	'~output' expression			|
+	'~output' string				|
+	'~import' string				|
+	'~if' expression statement		|
+	'~while' expression statement
+
 expression ::= term {binary_operator term}
 
-function ::= identifier '(' [expression] ')' | identifier '(' expression { ',' expression } ')'
+function ::= 
+	identifier '(' [expression] ')' | 
+	identifier '(' expression { ',' expression } ')'
 
-term ::= '(' expression ')' | '|' expression '|' | number | variable | function | '+' term | '-' term | term '!'
+term ::= 
+	'(' expression ')'	| 
+	'|' expression '|'	| 
+	number				| 
+	variable			| 
+	function			| 
+	'+' term			| 
+	'-' term			| 
+	term '!'			|
+	term ? term : term

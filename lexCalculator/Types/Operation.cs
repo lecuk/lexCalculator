@@ -10,6 +10,7 @@ namespace lexCalculator.Types
 		{
 			Unary,
 			Binary,
+			Ternary,
 			List,
 			Variable
 		}

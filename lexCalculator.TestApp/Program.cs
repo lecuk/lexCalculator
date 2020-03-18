@@ -7,6 +7,7 @@ using lexCalculator.Calculation;
 using System.Diagnostics;
 using lexCalculator.Processing;
 using lexCalculator.Types.TreeNodes;
+using lexCalculator.Types.Tokens;
 
 namespace lexCalculator.TestApp
 {
@@ -16,7 +17,7 @@ namespace lexCalculator.TestApp
 		static readonly Random rand = new Random();
 		static readonly ExpressionVisualizer visualizer = new ExpressionVisualizer();
 
-		static readonly ILexer lexer = new DefaultLexer();
+		static readonly ILexer lexer = new ExpressionLexer();
 		static readonly IParser parser = new DefaultParser();
 		static readonly ILinker linker = new DefaultLinker(true, false);
 		static readonly ITranslator<PostfixFunction> translator = new PostfixTranslator();

@@ -4,12 +4,13 @@ using System.Linq;
 using lexCalculator.Types;
 using lexCalculator.Types.TreeNodes;
 using lexCalculator.Types.Operations;
+using lexCalculator.Types.Tokens;
 
 namespace lexCalculator.Parsing
 {
 	public class DefaultParser : IParser
 	{
-		class ConstructionContext
+		public class ConstructionContext
 		{
 			Token[] tokens;
 			public int currentToken;
@@ -66,7 +67,7 @@ namespace lexCalculator.Parsing
 			}
 		}
 
-		TreeNode ParseTerm(ConstructionContext context)
+		public TreeNode ParseTerm(ConstructionContext context)
 		{
 			if (!context.TryGetNextToken(out Token token))
 			{
@@ -78,30 +79,30 @@ namespace lexCalculator.Parsing
 				case SymbolToken symbolToken:
 				{
 					// (expression)
-					if (symbolToken.Symbol == '(')
+					if (symbolToken.SymbolString == "(")
 					{
-						TreeNode node = ParseExpression(context, ')');
+						TreeNode node = ParseExpression(context, ")");
 						context.EatLastToken(); // eat right brackets
 						return node;
 					}
 					// |expression|
-					else if (symbolToken.Symbol == '|')
+					else if (symbolToken.SymbolString == "|")
 					{
-						TreeNode node = ParseExpression(context, '|');
+						TreeNode node = ParseExpression(context, "|");
 						context.EatLastToken(); // eat right brackets
 						return new UnaryOperationTreeNode(UnaryOperation.AbsoluteValue, node);
 					}
 					// -term
-					else if (symbolToken.Symbol == '-')
+					else if (symbolToken.SymbolString == "-")
 					{
 						return new UnaryOperationTreeNode(UnaryOperation.Negative, ParseTermWithPossibleFactorial(context));
 					}
 					// +term
-					else if (symbolToken.Symbol == '+')
+					else if (symbolToken.SymbolString == "+")
 					{
 						return ParseTermWithPossibleFactorial(context);
 					}
-					throw new Exception(String.Format("Unexpected symbol token when parsing term: '{0}'", symbolToken.Symbol));
+					throw new Exception(String.Format("Unexpected symbol token when parsing term: '{0}'", symbolToken.SymbolString));
 				}
 
 				case IdentifierToken identifierToken:
@@ -111,7 +112,7 @@ namespace lexCalculator.Parsing
 					{
 						return new UndefinedVariableTreeNode(identifierToken.Identifier);
 					}
-					else if (!(nextToken is SymbolToken nextSymbolToken && nextSymbolToken.Symbol == '('))
+					else if (!(nextToken is SymbolToken nextSymbolToken && nextSymbolToken.SymbolString == "("))
 					{
 						return new UndefinedVariableTreeNode(identifierToken.Identifier);
 					}
@@ -123,7 +124,7 @@ namespace lexCalculator.Parsing
 					// func()
 					if (context.TryPeekNextToken(out Token emptyFuncToken) &&
 						emptyFuncToken is SymbolToken emptyFuncSymbolToken &&
-						emptyFuncSymbolToken.Symbol == ')')
+						emptyFuncSymbolToken.SymbolString == ")")
 					{
 						context.EatLastToken(); // eat right brackets
 						return new UndefinedFunctionTreeNode(identifierToken.Identifier, new TreeNode[0]);
@@ -134,13 +135,13 @@ namespace lexCalculator.Parsing
 					List<TreeNode> parameters = new List<TreeNode>();
 					while (true)
 					{
-						TreeNode parameter = ParseExpression(context, ',', ')');
+						TreeNode parameter = ParseExpression(context, ",", ")");
 						parameters.Add(parameter);
 
 						if (context.TryGetNextToken(out Token delimToken) && delimToken is SymbolToken delimSymbolToken)
 						{
-							if (delimSymbolToken.Symbol == ',') continue;
-							if (delimSymbolToken.Symbol == ')') break;
+							if (delimSymbolToken.SymbolString == ",") continue;
+							if (delimSymbolToken.SymbolString == ")") break;
 							throw new Exception(String.Format("Can't parse function (unknown delimeter token '{0}')", delimSymbolToken));
 						}
 					}
@@ -159,13 +160,13 @@ namespace lexCalculator.Parsing
 		}
 
 		// stupid factorial. Why should it be after term, not before it?
-		TreeNode ParseTermWithPossibleFactorial(ConstructionContext context)
+		public TreeNode ParseTermWithPossibleFactorial(ConstructionContext context)
 		{
 			TreeNode term = ParseTerm(context);
 
 			while (context.TryPeekNextToken(out Token factorialToken) &&
 				factorialToken is SymbolToken factorialSymbolToken &&
-				factorialSymbolToken.Symbol == '!')
+				factorialSymbolToken.SymbolString == "!")
 			{
 				context.TryGetNextToken(out factorialToken); // eat factorial token
 
@@ -174,8 +175,37 @@ namespace lexCalculator.Parsing
 
 			return term;
 		}
+		
+		public TreeNode ParsePossibleTernaryTerm(ConstructionContext context)
+		{
+			TreeNode term = ParseTermWithPossibleFactorial(context);
 
-		void PopOperatorAndPushResult(Stack<TreeNode> termStack, Stack<BinaryOperatorOperation> operatorStack)
+			if (context.TryPeekNextToken(out Token questionToken) &&
+				questionToken is SymbolToken questionSymbolToken &&
+				questionSymbolToken.SymbolString == "?")
+			{
+				context.TryGetNextToken(out questionToken); // eat question token
+
+				TreeNode condition = term;
+				TreeNode thenNode = ParsePossibleTernaryTerm(context);
+
+				if (context.TryPeekNextToken(out Token colonToken) &&
+					colonToken is SymbolToken colonSymbolToken &&
+					colonSymbolToken.SymbolString == ":")
+				{
+					context.TryGetNextToken(out questionToken); // eat colon token
+
+					TreeNode elseNode = ParsePossibleTernaryTerm(context);
+
+					return new TernaryOperationTreeNode(TernaryOperation.Conditional, condition, thenNode, elseNode);
+				}
+				else throw new Exception("Unfimished ternary conditional expression: expected \":\"");
+			}
+
+			return term;
+		}
+
+		public void PopOperatorAndPushResult(Stack<TreeNode> termStack, Stack<BinaryOperatorOperation> operatorStack)
 		{
 			BinaryOperation operation = operatorStack.Pop();
 			// note: operators are popped in the reverse order because stack.
@@ -186,22 +216,22 @@ namespace lexCalculator.Parsing
 		}
 
 		// expression is parsed using Dijkstra's shunting-yard algorithm.
-		TreeNode ParseExpression(ConstructionContext context, params char[] stopSymbols)
+		public TreeNode ParseExpression(ConstructionContext context, params string[] stopTokens)
 		{
 			Stack<TreeNode> termStack = new Stack<TreeNode>();
 			Stack<BinaryOperatorOperation> operatorStack = new Stack<BinaryOperatorOperation>();
-			termStack.Push(ParseTermWithPossibleFactorial(context)); // expression should have at least one term
+			termStack.Push(ParsePossibleTernaryTerm(context)); // expression should have at least one term
 
 			// then there should be exactly one binary operator and one term every iteration
 			while (context.TryPeekNextToken(out Token token))
 			{
 				if (token is SymbolToken symbolToken)
 				{
-					if (ParseRules.IsBinaryOperatorChar(symbolToken.Symbol))
+					if (BinaryOperatorOperation.OperatorDictionary.ContainsKey(symbolToken.SymbolString))
 					{
 						context.EatLastToken(); // eat binary operator
 
-						BinaryOperatorOperation curOperation = BinaryOperatorOperation.OperatorDictionary[symbolToken.Symbol.ToString()];
+						BinaryOperatorOperation curOperation = BinaryOperatorOperation.OperatorDictionary[symbolToken.SymbolString];
 						while (operatorStack.Count > 0)
 						{
 							BinaryOperatorOperation topOperation = operatorStack.Peek();
@@ -214,10 +244,10 @@ namespace lexCalculator.Parsing
 						}
 						operatorStack.Push(curOperation);
 
-						termStack.Push(ParseTermWithPossibleFactorial(context));
+						termStack.Push(ParsePossibleTernaryTerm(context));
 						continue;
 					}
-					else if (stopSymbols.Contains(symbolToken.Symbol))
+					else if (stopTokens.Contains(symbolToken.SymbolString))
 					{
 						while (operatorStack.Count > 0)
 						{
@@ -226,10 +256,10 @@ namespace lexCalculator.Parsing
 						return termStack.Pop();
 					}
 				}
-				throw new Exception(String.Format("Unexpected token: '{0}', expected binary operator or stop-symbol", token));
+				throw new Exception(String.Format("Unexpected token: '{0}', expected binary operator or stop-token", token));
 			}
 
-			if (stopSymbols.Length > 0) throw new Exception(String.Format("Unfinished expression: expected stop symbol '{0}'", stopSymbols[0]));
+			if (stopTokens.Length > 0) throw new Exception(String.Format("Unfinished expression: expected stop token '{0}'", stopTokens[0]));
 
 			while (operatorStack.Count > 0)
 			{
