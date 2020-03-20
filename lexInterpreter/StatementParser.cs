@@ -219,6 +219,9 @@ namespace lexInterpreter
 				case KeywordToken.Type.Exit:
 					return new ExitStatement(executionContext);
 
+				case KeywordToken.Type.Newline:
+					return new OutputNewLineStatement(executionContext);
+
 				default:
 					throw new Exception("Unknown keyword token");
 			}
@@ -263,7 +266,7 @@ namespace lexInterpreter
 		private InputStatement ParseInputStatement(ConstructionContext constructionContext, Token[] tokens, KeywordToken firstToken)
 		{
 			if (tokens.Length < 2) throw new Exception("Not enough tokens for input statement");
-			if (tokens.Length > 2) throw new Exception("Excess tokens for input statement");
+			if (tokens.Length > 2) throw new Exception("Too many tokens for input statement");
 
 			if (tokens[1] is IdentifierToken variableToken)
 			{
@@ -278,6 +281,7 @@ namespace lexInterpreter
 
 			if (tokens[1] is StringToken stringToken)
 			{
+				if (tokens.Length > 2) throw new Exception("Too many tokens for output statement");
 				return new OutputStringStatement(executionContext, stringToken.Text);
 			}
 
@@ -294,7 +298,7 @@ namespace lexInterpreter
 
 		private Statement ParseIf(ConstructionContext constructionContext, Token[] tokens, KeywordToken firstToken)
 		{
-			if (tokens.Length < 2) throw new Exception("Not enough tokens for output statement");
+			if (tokens.Length < 2) throw new Exception("Not enough tokens for if statement");
 
 			Token[] expressionTokens = new Token[tokens.Length - 1];
 			for (int i = 1; i < tokens.Length; ++i)
@@ -313,7 +317,7 @@ namespace lexInterpreter
 					if ((elseKeywordLine[0] is KeywordToken elseKeyword)
 					&& (elseKeyword.KeywordType == KeywordToken.Type.Else))
 					{
-						if (elseKeywordLine.Length != 1) throw new Exception("Else line should not contain anything except keyword \"~else\"");
+						if (elseKeywordLine.Length > 1) throw new Exception("Else line should not contain anything except keyword \"~else\"");
 
 						if (constructionContext.TryGetNextNonEmptyLine(out Token[] elseLine))
 						{
@@ -331,7 +335,7 @@ namespace lexInterpreter
 
 		private Statement ParseWhile(ConstructionContext constructionContext, Token[] tokens, KeywordToken firstToken)
 		{
-			if (tokens.Length < 2) throw new Exception("Not enough tokens for output statement");
+			if (tokens.Length < 2) throw new Exception("Not enough tokens for while statement");
 
 			Token[] expressionTokens = new Token[tokens.Length - 1];
 			for (int i = 1; i < tokens.Length; ++i)
@@ -349,7 +353,7 @@ namespace lexInterpreter
 			else throw new Exception("No while body statement");
 		}
 
-		public Statement[] ParseLines(Token[][] lines)
+		public Statement ParseLines(Token[][] lines)
 		{
 			List<Statement> statements = new List<Statement>();
 			ConstructionContext constructionContext = new ConstructionContext(lines);
@@ -360,7 +364,10 @@ namespace lexInterpreter
 				statements.Add(statement);
 			}
 
-			return statements.ToArray();
+			if (statements.Count == 0) return new EmptyStatement(executionContext);
+			if (statements.Count == 1) return statements[0];
+
+			return new MultiStatement(executionContext, statements.ToArray());
 		}
 	}
 }

@@ -6,8 +6,11 @@ length2d(x, y) = sqrt(square(x) + square(y))
 
 // returns length of a vector
 ~output "Enter x"
+~newline
 ~input x
 ~output "Enter y"
+~newline
 ~input y
-~output "length of vector {x, y}"
+~output "length of vector {x, y}: "
 ~output length2d(x, y)
+~newline

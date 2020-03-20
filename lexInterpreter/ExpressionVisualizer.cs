@@ -4,10 +4,20 @@ using lexCalculator.Linking;
 using lexCalculator.Types.TreeNodes;
 using System;
 
-namespace lexCalculator.TestApp
+namespace lexInterpreter
 {
 	class ExpressionVisualizer
 	{
+		public void PrintPrefix(string prefixStr)
+		{
+			for (int i = 0; i < prefixStr.Length; ++i)
+			{
+				Console.ForegroundColor = (ConsoleColor)prefixStr[i];
+				Console.Write("|   ");
+				Console.ResetColor();
+			}
+		}
+
 		public void VisualizeAsTree(TreeNode node, CalculationContext context)
 		{
 			VisualizeAsTreeRecursion(node, context.VariableTable, context.FunctionTable, true, String.Empty);
@@ -19,15 +29,7 @@ namespace lexCalculator.TestApp
 			bool recursivelyVisualiseFunctions, 
 			string colorStr)
 		{
-			for (int i = 0; i < colorStr.Length; ++i)
-			{
-				if (colorStr[i] == '0') Console.ForegroundColor = ConsoleColor.Gray;
-				if (colorStr[i] == '1') Console.ForegroundColor = ConsoleColor.Red;
-				if (colorStr[i] == '2') Console.ForegroundColor = ConsoleColor.Yellow;
-				if (colorStr[i] == '3') Console.ForegroundColor = ConsoleColor.Magenta;
-				Console.Write("|   ");
-				Console.ResetColor();
-			}
+			PrintPrefix(colorStr);
 
 			switch (node)
 			{
@@ -77,7 +79,7 @@ namespace lexCalculator.TestApp
 						Console.WriteLine(String.Format("[F:{0}]", fiTreeNode.Index));
 						foreach (TreeNode child in fiTreeNode.Parameters)
 						{
-							VisualizeAsTreeRecursion(child, variableTable, functionTable, recursivelyVisualiseFunctions, colorStr + '3');
+							VisualizeAsTreeRecursion(child, variableTable, functionTable, recursivelyVisualiseFunctions, colorStr + (char)ConsoleColor.Magenta);
 						}
 						Console.ResetColor();
 					}
@@ -91,7 +93,7 @@ namespace lexCalculator.TestApp
 					Console.ResetColor();
 					foreach (TreeNode child in fTreeNode.Parameters)
 					{
-						VisualizeAsTreeRecursion(child, variableTable, functionTable, recursivelyVisualiseFunctions, colorStr + '0');
+						VisualizeAsTreeRecursion(child, variableTable, functionTable, recursivelyVisualiseFunctions, colorStr + (char)ConsoleColor.Magenta);
 					}
 					break;
 				}
@@ -101,7 +103,7 @@ namespace lexCalculator.TestApp
 					Console.ForegroundColor = ConsoleColor.Red;
 					Console.WriteLine(String.Format("[{0}]", uTreeNode.Operation.FunctionName));
 					Console.ResetColor();
-					VisualizeAsTreeRecursion(uTreeNode.Child, variableTable, functionTable, recursivelyVisualiseFunctions, colorStr + '1');
+					VisualizeAsTreeRecursion(uTreeNode.Child, variableTable, functionTable, recursivelyVisualiseFunctions, colorStr + (char)ConsoleColor.Red);
 					break;
 				}
 
@@ -110,19 +112,11 @@ namespace lexCalculator.TestApp
 					Console.ForegroundColor = ConsoleColor.Yellow;
 					Console.WriteLine(String.Format("[{0}]", bTreeNode.Operation.FunctionName));
 					Console.ResetColor();
-					VisualizeAsTreeRecursion(bTreeNode.LeftChild, variableTable, functionTable, recursivelyVisualiseFunctions, colorStr + '2');
-					VisualizeAsTreeRecursion(bTreeNode.RightChild, variableTable, functionTable, recursivelyVisualiseFunctions, colorStr + '2');
+					VisualizeAsTreeRecursion(bTreeNode.LeftChild, variableTable, functionTable, recursivelyVisualiseFunctions, colorStr + (char)ConsoleColor.Yellow);
+					VisualizeAsTreeRecursion(bTreeNode.RightChild, variableTable, functionTable, recursivelyVisualiseFunctions, colorStr + (char)ConsoleColor.Yellow);
 					break;
 				}
 			}
-
-			/*
-			for (int i = 0; i < level; ++i)
-			{
-				Console.Write("|   ");
-			}
-			Console.WriteLine();
-			*/
 		}
 
 		public void VisualizeAsPrefixEquation(TreeNode node)

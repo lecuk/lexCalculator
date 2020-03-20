@@ -13,7 +13,8 @@ namespace lexInterpreter
 			Else,
 			While,
 			Import,
-			Exit
+			Exit,
+			Newline
 		}
 
 		public readonly Type KeywordType;

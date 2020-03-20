@@ -44,12 +44,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ExecutionContext.cs" />
+    <Compile Include="ExpressionVisualizer.cs" />
     <Compile Include="KeywordToken.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Statement.cs" />
     <Compile Include="StatementLexer.cs" />
     <Compile Include="StatementParser.cs" />
+    <Compile Include="StatementVisualizer.cs" />
     <Compile Include="StringToken.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -64,6 +66,8 @@
   <ItemGroup>
     <Content Include="example2.txt" />
     <Content Include="example1.txt" />
+    <Content Include="example3.txt" />
+    <Content Include="example4.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

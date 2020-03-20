@@ -102,6 +102,9 @@ namespace lexInterpreter
 
 				if (identifier.Identifier == "exit")
 					return new KeywordToken(KeywordToken.Type.Exit, identifier.Identifier);
+
+				if (identifier.Identifier == "newline")
+					return new KeywordToken(KeywordToken.Type.Newline, identifier.Identifier);
 			}
 
 			throw new Exception("Invalid keyword");

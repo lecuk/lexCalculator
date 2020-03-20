@@ -3,16 +3,20 @@
 i = 10
 
 // countdown
+~output "Enter any positive number"
+~newline
+~input i
 
 ~if i <= 0 
 {
-	~output "Error"
+	~output "Not a positive number"
+	~newline
 	~exit
 }
-
 
 ~while i > 0
 {
 	~output i
+	~newline
 	i -= 1 // blabla blah
 }

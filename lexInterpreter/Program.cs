@@ -19,6 +19,7 @@ namespace lexInterpreter
 			new DefaultParser(),
 			new DefaultLinker(true),
 			new TreeCalculator());
+		static StatementVisualizer visualizer = new StatementVisualizer();
 
 		// C:\Users\Asus\source\repos\lexCalculator\lexInterpreter\example2.txt
 		static int RunFile(string path, CalculationContext context, bool allowCalculations, bool allowDefinitions)
@@ -38,8 +39,8 @@ namespace lexInterpreter
 					{
 						line = fullLine.Substring(0, commentIndex);
 					}
-					else if (commentIndex == 0) continue; 
-					
+					else if (commentIndex == 0) continue;
+
 					tokenLines.Add(lexer.Tokenize(line));
 				}
 				catch (Exception ex)
@@ -62,11 +63,11 @@ namespace lexInterpreter
 			}
 			*/
 
-			Statement[] statements = new Statement[0];
+			Statement mainStatement;
 
 			try
 			{
-				statements = parser.ParseLines(tokenLines.ToArray());
+				mainStatement = parser.ParseLines(tokenLines.ToArray());
 			}
 			catch (Exception ex)
 			{
@@ -74,36 +75,34 @@ namespace lexInterpreter
 				return 4;
 			}
 
-			foreach (Statement statement in statements)
+			/* PRINT TREE FOR DEBUG */
+			visualizer.Visualize(mainStatement);
+			
+			try
 			{
-				try
-				{
-					statement.Prepare();
-				}
-				catch (Exception ex)
-				{
-					Console.WriteLine("Error during file \"{0}\" preparing: {1}", path, ex.Message);
-					return 5;
-				}
+				mainStatement.Prepare();
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine("Error during file \"{0}\" preparing: {1}", path, ex.Message);
+				return 5;
 			}
 
-			foreach (Statement statement in statements)
+			try
 			{
-				try
-				{
-					statement.Execute();
-				}
-				catch (ExitStatement.ExitException)
-				{
-					Console.WriteLine("Program finished.");
-					return 0;
-				}
-				catch (Exception ex)
-				{
-					Console.WriteLine("Error during file \"{0}\" executing: {1}", path, ex.Message);
-					return 6;
-				}
+				mainStatement.Execute();
 			}
+			catch (ExitStatement.ExitException)
+			{
+				Console.WriteLine("Program finished.");
+				return 0;
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine("Error during file \"{0}\" executing: {1}", path, ex.Message);
+				return 6;
+			}
+
 
 			return 0;
 		}

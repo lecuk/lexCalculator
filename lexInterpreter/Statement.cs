@@ -2,22 +2,16 @@
 using lexCalculator.Types;
 using lexCalculator.Types.Operations;
 using System;
+using System.Globalization;
 
 namespace lexInterpreter
 {
-	class Statement
+	abstract class Statement
 	{
 		public ExecutionContext Context { get; protected set; }
 
-		public virtual void Prepare()
-		{
-			// empty statement
-		}
-
-		public virtual void Execute()
-		{
-			// empty statement
-		}
+		public abstract void Prepare();
+		public abstract void Execute();
 
 		public Statement(ExecutionContext context)
 		{
@@ -25,9 +19,26 @@ namespace lexInterpreter
 		}
 	}
 
+	class EmptyStatement : Statement
+	{
+		public override void Prepare()
+		{
+		}
+
+		public override void Execute()
+		{
+		}
+
+		public EmptyStatement(ExecutionContext context) : base(context) { }
+	}
+
 	class ExitStatement : Statement
 	{
 		public class ExitException : Exception { }
+
+		public override void Prepare()
+		{
+		}
 
 		public override void Execute()
 		{
@@ -206,6 +217,10 @@ namespace lexInterpreter
 			VariableName = variableName;
 		}
 
+		public override void Prepare()
+		{
+		}
+
 		public override void Execute()
 		{
 			double value;
@@ -214,7 +229,10 @@ namespace lexInterpreter
 				Console.ForegroundColor = ConsoleColor.Green;
 				Console.Write("> ");
 				string input = Console.ReadLine();
-				if (Double.TryParse(input, out value)) break;
+				if (Double.TryParse(input, 
+					NumberStyles.AllowExponent | NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingSign, 
+					CultureInfo.InvariantCulture, 
+					out value)) break;
 
 				Console.ForegroundColor = ConsoleColor.Yellow;
 				Console.WriteLine("Invalid input");
@@ -245,7 +263,7 @@ namespace lexInterpreter
 		public override void Execute()
 		{
 			double value = Context.Calculator.Calculate(DefinedExpression);
-			Console.WriteLine(" = {0}", value.ToString("G6", System.Globalization.CultureInfo.InvariantCulture));
+			Console.Write("{0}", value.ToString("G6", System.Globalization.CultureInfo.InvariantCulture));
 		}
 	}
 
@@ -259,9 +277,28 @@ namespace lexInterpreter
 			Text = text;
 		}
 
+		public override void Prepare()
+		{
+		}
+
 		public override void Execute()
 		{
-			Console.WriteLine(Text);
+			Console.Write(Text);
+		}
+	}
+
+	class OutputNewLineStatement : Statement
+	{
+		public OutputNewLineStatement(ExecutionContext context)
+			: base(context) {  }
+
+		public override void Prepare()
+		{
+		}
+
+		public override void Execute()
+		{
+			Console.WriteLine();
 		}
 	}
 
@@ -273,6 +310,10 @@ namespace lexInterpreter
 			: base(context)
 		{
 			Path = path;
+		}
+
+		public override void Prepare()
+		{
 		}
 
 		public override void Execute()
