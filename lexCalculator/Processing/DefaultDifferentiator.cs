@@ -6,7 +6,7 @@ using lexCalculator.Types.Operations;
 
 namespace lexCalculator.Processing
 {
-	public class DefaultDifferentiator : IDiffertiator
+	public class DefaultDifferentiator : IDifferentiator
 	{
 		static readonly TreeNode X = new FunctionParameterTreeNode(0);
 		static readonly TreeNode dX = new FunctionParameterTreeNode(1);
@@ -21,7 +21,12 @@ namespace lexCalculator.Processing
 			
 			// sign'(u) = ({-1, 0, 1})' = 0
 			{ UnaryOperation.Sign,
-				new NumberTreeNode(0)},
+				new TernaryOperationTreeNode(TernaryOperation.Conditional,
+					new BinaryOperationTreeNode(BinaryOperatorOperation.Equal,
+						X,  
+						new NumberTreeNode(0)),
+					new NumberTreeNode(Double.NaN),
+					new NumberTreeNode(0))},
 			
 			// sin'(u) = u' * cos(u)
 			{ UnaryOperation.Sine,

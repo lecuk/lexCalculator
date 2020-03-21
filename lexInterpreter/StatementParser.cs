@@ -67,13 +67,8 @@ namespace lexInterpreter
 		{
 			// i know, horrible code. Forgive me
 			expressionParser = new DefaultParser();
-			expressionLinker = new DefaultLinker(true);
-			executionContext = new ExecutionContext(
-				StandardLibrary.GenerateStandardContext(),
-				new ExpressionLexer(),
-				expressionParser,
-				expressionLinker,
-				new TreeCalculator());
+			expressionLinker = new DefaultLinker(true, false);
+			executionContext = new ExecutionContext(StandardLibrary.GenerateStandardContext());
 		}
 
 		public Statement ParseLine(ConstructionContext constructionContext, Token[] line)
@@ -187,11 +182,49 @@ namespace lexInterpreter
 					treePart[i - assignIndex - 1] = line[i];
 				}
 
-				TreeNode functionTree = expressionParser.ParseExpression(new DefaultParser.ConstructionContext(treePart));
-
-				return new FunctionDefinitionStatement(executionContext, ufTreeNode.Name, parameterNames, functionTree);
+				return ParseFunctionDerivativeOrDirectDefinition(constructionContext, ufTreeNode.Name, parameterNames, treePart);
 			}
 			else throw new Exception("Invalid assignment, what are you trying to define?");
+		}
+
+		private Statement ParseFunctionDerivativeOrDirectDefinition(
+			ConstructionContext constructionContext, string functionName, string[] parameterNames, Token[] treeTokens)
+		{
+			// check if it's derivative definition
+			if (treeTokens.Length > 3
+			&& treeTokens[0] is IdentifierToken dToken && dToken.Identifier == "d"
+			&& treeTokens[1] is SymbolToken colonToken && colonToken.SymbolString == ":"
+			&& treeTokens[2] is IdentifierToken diffVariableToken)
+			{
+				Token[] functionPart = new Token[treeTokens.Length - 3];
+				for (int i = 3; i < treeTokens.Length; ++i)
+				{
+					functionPart[i - 3] = treeTokens[i];
+				}
+
+				TreeNode functionToDifferentiate = executionContext.Parser.Construct(functionPart);
+				if (functionToDifferentiate is UndefinedFunctionTreeNode ufTreeNode)
+				{
+					int parameterIndex = -1;
+					for (int i = 0; i < parameterNames.Length; ++i)
+					{
+						if (ufTreeNode.Parameters[i] is UndefinedVariableTreeNode parameterNode)
+						{
+							if (parameterNode.Name == diffVariableToken.Identifier)
+							{
+								if (parameterIndex != -1) throw new Exception("Invalid parameter in function definition");
+								parameterIndex = i;
+							}
+						}
+						else throw new Exception("Invalid parameter in function definition");
+					}
+					if (parameterIndex == -1) throw new Exception("No such parameter to differentiate from");
+					
+					return new DerivativeAssignmentStatement(executionContext, functionName, parameterNames, ufTreeNode, parameterIndex);
+				}
+				else throw new Exception("Only derivative of whole function is allowed");
+			}
+			else return new FunctionDefinitionStatement(executionContext, functionName, parameterNames, executionContext.Parser.Construct(treeTokens));
 		}
 
 		private Statement ParseKeywordToken(ConstructionContext constructionContext, Token[] tokens, KeywordToken firstToken)
@@ -222,9 +255,37 @@ namespace lexInterpreter
 				case KeywordToken.Type.Newline:
 					return new OutputNewLineStatement(executionContext);
 
+				case KeywordToken.Type.Optimize:
+					return ParseOptimize(constructionContext, tokens, firstToken);
+
+				case KeywordToken.Type.DrawTree:
+					return ParseDrawTree(constructionContext, tokens, firstToken);
+
 				default:
 					throw new Exception("Unknown keyword token");
 			}
+		}
+
+		private Statement ParseOptimize(ConstructionContext constructionContext, Token[] tokens, KeywordToken firstToken)
+		{
+			if (tokens.Length < 2) throw new Exception("Not enough tokens for optimize statement");
+			if (tokens.Length > 2) throw new Exception("Excess tokens for optimize statement");
+
+			if (tokens[1] is IdentifierToken functionName)
+				return new OptimizeTreeStatement(executionContext, functionName.Identifier);
+
+			throw new Exception("Invalid optimize statement specification");
+		}
+
+		private Statement ParseDrawTree(ConstructionContext constructionContext, Token[] tokens, KeywordToken firstToken)
+		{
+			if (tokens.Length < 2) throw new Exception("Not enough tokens for tree statement");
+			if (tokens.Length > 2) throw new Exception("Excess tokens for tree statement");
+
+			if (tokens[1] is IdentifierToken functionName)
+				return new DrawTreeStatement(executionContext, functionName.Identifier);
+
+			throw new Exception("Invalid optimize tree specification");
 		}
 
 		private Statement ParseSymbolToken(ConstructionContext constructionContext, Token[] tokens, SymbolToken firstToken)

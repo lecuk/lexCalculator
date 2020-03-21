@@ -34,15 +34,15 @@ namespace lexCalculator.Types.Operations
 		public static readonly BinaryOperatorOperation Power			= new BinaryOperatorOperation("pow",	Math.Pow,				 3, false, "^");
 		public static readonly BinaryOperatorOperation Remainder		= new BinaryOperatorOperation("rem",	Math.IEEERemainder,		 2, false, "%");
 
-		public static readonly BinaryOperatorOperation More				= new BinaryOperatorOperation("more",	MoreMath.More,			 4, true, ">");
-		public static readonly BinaryOperatorOperation Less				= new BinaryOperatorOperation("less",	MoreMath.Less,			 4, true, "<");
-		public static readonly BinaryOperatorOperation MoreEqual		= new BinaryOperatorOperation("mequal",	MoreMath.MoreOrEqual,	 4, true, ">=");
-		public static readonly BinaryOperatorOperation LessEqual		= new BinaryOperatorOperation("lequal",	MoreMath.LessOrEqual,	 4, true, "<=");
-		public static readonly BinaryOperatorOperation Equal			= new BinaryOperatorOperation("equal",	MoreMath.Equal,			 4, true, "==");
-		public static readonly BinaryOperatorOperation NotEqual			= new BinaryOperatorOperation("nequal", MoreMath.NotEqual,		 4, true, "!=");
+		public static readonly BinaryOperatorOperation More				= new BinaryOperatorOperation("more",	MoreMath.More,			-1, true, ">");
+		public static readonly BinaryOperatorOperation Less				= new BinaryOperatorOperation("less",	MoreMath.Less,			-1, true, "<");
+		public static readonly BinaryOperatorOperation MoreEqual		= new BinaryOperatorOperation("mequal",	MoreMath.MoreOrEqual,	-1, true, ">=");
+		public static readonly BinaryOperatorOperation LessEqual		= new BinaryOperatorOperation("lequal",	MoreMath.LessOrEqual,	-1, true, "<=");
+		public static readonly BinaryOperatorOperation Equal			= new BinaryOperatorOperation("equal",	MoreMath.Equal,			-1, true, "==");
+		public static readonly BinaryOperatorOperation NotEqual			= new BinaryOperatorOperation("nequal", MoreMath.NotEqual,		-1, true, "!=");
 
-		public static readonly BinaryOperatorOperation And				= new BinaryOperatorOperation("and",	MoreMath.And,			-1, true, "&&");
-		public static readonly BinaryOperatorOperation Or				= new BinaryOperatorOperation("or",		MoreMath.Or,			-1, true, "??");
-		public static readonly BinaryOperatorOperation Xor				= new BinaryOperatorOperation("xor",	MoreMath.Xor,			-1, true, "!!");
+		public static readonly BinaryOperatorOperation And				= new BinaryOperatorOperation("and",	MoreMath.And,			-2, true, "&&");
+		public static readonly BinaryOperatorOperation Or				= new BinaryOperatorOperation("or",		MoreMath.Or,			-2, true, "??");
+		public static readonly BinaryOperatorOperation Xor				= new BinaryOperatorOperation("xor",	MoreMath.Xor,			-2, true, "!!");
 	}
 }

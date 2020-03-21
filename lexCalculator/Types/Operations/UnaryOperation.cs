@@ -54,6 +54,7 @@ namespace lexCalculator.Types.Operations
 
 		public static readonly UnaryOperation Floor = new UnaryOperation("floor", Math.Floor);
 		public static readonly UnaryOperation Ceiling = new UnaryOperation("ceil", Math.Ceiling);
+		public static readonly UnaryOperation Round = new UnaryOperation("round", Math.Round);
 
 		public static readonly UnaryOperation Factorial = new UnaryOperation("fact", MoreMath.Factorial, "{0}!", true);
 	}

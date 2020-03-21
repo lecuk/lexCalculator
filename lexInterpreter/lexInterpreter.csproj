@@ -43,6 +43,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="example4.txt" />
+    <Content Include="example5.txt" />
     <Compile Include="ExecutionContext.cs" />
     <Compile Include="ExpressionVisualizer.cs" />
     <Compile Include="KeywordToken.cs" />
@@ -53,6 +55,7 @@
     <Compile Include="StatementParser.cs" />
     <Compile Include="StatementVisualizer.cs" />
     <Compile Include="StringToken.cs" />
+    <Content Include="example6.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -67,7 +70,6 @@
     <Content Include="example2.txt" />
     <Content Include="example1.txt" />
     <Content Include="example3.txt" />
-    <Content Include="example4.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

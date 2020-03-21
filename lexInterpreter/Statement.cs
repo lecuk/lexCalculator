@@ -75,6 +75,36 @@ namespace lexInterpreter
 		}
 	}
 
+	class DerivativeAssignmentStatement : Statement
+	{
+		public DerivativeAssignmentStatement(ExecutionContext context, string functionName, string[] parameterNames, TreeNode functionDefinition, int parameterIndex)
+			: base(context)
+		{
+			FunctionName = functionName;
+			ParameterNames = parameterNames;
+			FunctionDefinition = functionDefinition;
+			ParameterIndex = parameterIndex;
+		}
+
+		public string FunctionName { get; set; }
+		public string[] ParameterNames { get; set; }
+		public TreeNode FunctionDefinition { get; set; }
+		public int ParameterIndex { get; set; }
+
+		private FinishedFunction Derivative;
+
+		public override void Prepare()
+		{
+			FinishedFunction definedFunction = Context.Linker.BuildFunction(FunctionDefinition, Context.CalculationContext, ParameterNames);
+			Derivative = Context.Differentiator.FindDifferential(definedFunction, ParameterIndex);
+			Context.CalculationContext.FunctionTable.AssignItem(FunctionName, Derivative);
+		}
+
+		public override void Execute()
+		{
+		}
+	}
+
 	class VariableAssignmentStatement : Statement
 	{
 		public string VariableName { get; set; }
@@ -319,6 +349,47 @@ namespace lexInterpreter
 		public override void Execute()
 		{
 			throw new NotImplementedException();
+		}
+	}
+
+	class DrawTreeStatement : Statement
+	{
+		public string FunctionName { get; set; }
+
+		public DrawTreeStatement(ExecutionContext context, string functionName)
+			: base(context)
+		{
+			FunctionName = functionName;
+		}
+
+		public override void Prepare()
+		{
+		}
+
+		public override void Execute()
+		{
+			new ExpressionVisualizer().VisualizeAsTree(Context.CalculationContext.FunctionTable[FunctionName].TopNode, Context.CalculationContext);
+		}
+	}
+
+	class OptimizeTreeStatement : Statement
+	{
+		public string FunctionName { get; set; }
+
+		public OptimizeTreeStatement(ExecutionContext context, string functionName)
+			: base(context)
+		{
+			FunctionName = functionName;
+		}
+
+		public override void Prepare()
+		{
+		}
+
+		public override void Execute()
+		{
+			Context.CalculationContext.FunctionTable.AssignItem(FunctionName, 
+				Context.Optimizer.OptimizeWithTable(Context.CalculationContext.FunctionTable[FunctionName]));
 		}
 	}
 }

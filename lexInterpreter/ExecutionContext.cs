@@ -2,6 +2,7 @@
 using lexCalculator.Linking;
 using lexCalculator.Parsing;
 using lexCalculator.Types;
+using lexCalculator.Processing;
 
 namespace lexInterpreter
 {
@@ -12,14 +13,18 @@ namespace lexInterpreter
 		public IParser Parser { get; set; }
 		public ILinker Linker { get; set; }
 		public ICalculator<FinishedFunction> Calculator { get; set; }
-		
-		public ExecutionContext(CalculationContext calculationContext, ILexer lexer, IParser parser, ILinker linker, ICalculator<FinishedFunction> calculator)
+		public IDifferentiator Differentiator { get; set; }
+		public IOptimizer Optimizer { get; set; }
+
+		public ExecutionContext(CalculationContext calculationContext)
 		{
 			CalculationContext = calculationContext;
-			Lexer = lexer;
-			Parser = parser;
-			Linker = linker;
-			Calculator = calculator;
+			Lexer = new ExpressionLexer();
+			Parser = new DefaultParser();
+			Linker = new DefaultLinker(true, false);
+			Calculator = new TreeCalculator();
+			Differentiator = new DefaultDifferentiator();
+			Optimizer = new DefaultOptimizer(2);
 		}
 	}
 }

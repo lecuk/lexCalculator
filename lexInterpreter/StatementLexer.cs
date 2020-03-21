@@ -105,6 +105,12 @@ namespace lexInterpreter
 
 				if (identifier.Identifier == "newline")
 					return new KeywordToken(KeywordToken.Type.Newline, identifier.Identifier);
+
+				if (identifier.Identifier == "tree")
+					return new KeywordToken(KeywordToken.Type.DrawTree, identifier.Identifier);
+
+				if (identifier.Identifier == "optimize")
+					return new KeywordToken(KeywordToken.Type.Optimize, identifier.Identifier);
 			}
 
 			throw new Exception("Invalid keyword");

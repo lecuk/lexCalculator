@@ -2,10 +2,23 @@
 
 f(x) = x^2
 
+// !!!!!!! important !!!!!!!!
+// this is special format of finding a derivative: d:x
+// firstly you write "d:" and after you write name of argument being differentiated and then function with parameters
+
 df(x) = d:x f(x)
 
+~newline
+~output "Unoptimized derivative of x^2 is: "
+~newline
+
 ~tree df
+~newline
 
 ~optimize df
 
+~output "Behold the power of optimization!"
+~newline
+
 ~tree df
+~newline

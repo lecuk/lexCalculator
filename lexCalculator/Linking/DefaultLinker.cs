@@ -120,6 +120,12 @@ namespace lexCalculator.Linking
 					bTree.RightChild = ReplaceParametersWithTreeNodes(bTree.RightChild, parameterTrees);
 					return bTree;
 
+				case TernaryOperationTreeNode bTree:
+					bTree.LeftChild = ReplaceParametersWithTreeNodes(bTree.LeftChild, parameterTrees);
+					bTree.MiddleChild = ReplaceParametersWithTreeNodes(bTree.MiddleChild, parameterTrees);
+					bTree.RightChild = ReplaceParametersWithTreeNodes(bTree.RightChild, parameterTrees);
+					return bTree;
+
 				case UndefinedFunctionTreeNode fTree:
 				{
 					for (int i = 0; i < fTree.Parameters.Length; ++i)

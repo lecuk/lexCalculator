@@ -45,14 +45,14 @@ namespace lexCalculator.Parsing
 
 		public static bool IsValidSymbolChar(char symbol)
 		{
-			const string allSymbols = "+-*/^%!()|,?:=><{}";
+			const string allSymbols = "+-*/^%!()|,?:=><{}&'";
 			return (allSymbols.IndexOf(symbol) != -1);
 		}
 
 		// for example, + can be paired with = to make +=
 		public static bool SymbolCanBePairedForAnotherSymbolToken(char symbol)
 		{
-			const string symbols = "+-*/^%!=><";
+			const string symbols = "+-*/^%?!=><&";
 			return (symbols.IndexOf(symbol) != -1);
 		}
 

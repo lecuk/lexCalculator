@@ -1,9 +1,8 @@
-﻿f1(x) = x^2
-f2(x, y) = x^2 / ln(y)
+﻿a = 0
+a = 0
 
-// !!!!!!! important !!!!!!!!
-// this is special format of finding a derivative: d:x
-// firstly you write "d:" and after you write name of argument being differentiated and then function with parameters
+f1(x) = x^2
+f2(x, y) = x^2 / ln(y)
 
 df1(x) = d:x f1(x)
 

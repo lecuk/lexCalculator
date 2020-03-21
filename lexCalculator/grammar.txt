@@ -25,6 +25,9 @@ statement ::=
 	'~output' string				|
 	'~import' string				|
 	'~if' expression statement		|
+	'~newline'						|
+	'~exit'							|
+	'~if' expression statement		|
 	'~while' expression statement
 
 expression ::= term {binary_operator term}

@@ -199,7 +199,7 @@ namespace lexCalculator.Parsing
 
 					return new TernaryOperationTreeNode(TernaryOperation.Conditional, condition, thenNode, elseNode);
 				}
-				else throw new Exception("Unfimished ternary conditional expression: expected \":\"");
+				else throw new Exception("Unfinished ternary conditional expression: expected \":\"");
 			}
 
 			return term;

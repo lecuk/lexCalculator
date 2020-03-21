@@ -13,12 +13,7 @@ namespace lexInterpreter
 	{
 		static StatementLexer lexer = new StatementLexer();
 		static StatementParser parser = new StatementParser();
-		static ExecutionContext context = new ExecutionContext(
-			StandardLibrary.GenerateStandardContext(),
-			new ExpressionLexer(),
-			new DefaultParser(),
-			new DefaultLinker(true),
-			new TreeCalculator());
+		static ExecutionContext context = new ExecutionContext(StandardLibrary.GenerateStandardContext());
 		static StatementVisualizer visualizer = new StatementVisualizer();
 
 		// C:\Users\Asus\source\repos\lexCalculator\lexInterpreter\example2.txt
@@ -51,7 +46,7 @@ namespace lexInterpreter
 				}
 			}
 
-			/* PRINT TOKENS FOR DEBUG
+			/* PRINT TOKENS FOR DEBUG */
 			foreach (var tokenLine in tokenLines)
 			{
 				Console.Write("[ ");
@@ -61,7 +56,6 @@ namespace lexInterpreter
 				}
 				Console.WriteLine("]");
 			}
-			*/
 
 			Statement mainStatement;
 

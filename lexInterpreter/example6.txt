@@ -1,16 +1,36 @@
-﻿numberToCheck = 1
-numberToDivideBy = 1
+﻿// Program which searches for prime numbers!
 
-maxNumber = 1000
-maxDivisor = ceil(sqrt(maxNumber))
+// Modify maxNumber to search for more numbers
+maxNumber = 50
 
+numberToCheck = 1
 ~while (numberToCheck <= maxNumber)
 {
-	~while (numberToDivideBy <= maxNumber)
+	maxDivisor = numberToCheck / 2
+	zeroRemainderDivisor = 1
+	numberToDivideBy = 2
+	
+	~while (numberToDivideBy <= maxDivisor)
 	{
+		~if (numberToCheck % numberToDivideBy == 0)
+		{
+			zeroRemainderDivisor = numberToDivideBy
+			~output numberToCheck
+			~output " is divisible by "
+			~output zeroRemainderDivisor
+			~newline
+		}
+
 		numberToDivideBy += 1
 	}	
-	~output numberToCheck
+	
+	~if (zeroRemainderDivisor == 1)
+	{
+		~output numberToCheck
+		~output " is PRIME"
+		~newline
+	}
+	~newline
 
 	numberToCheck += 1
 }

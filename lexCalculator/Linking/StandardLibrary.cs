@@ -51,6 +51,10 @@ namespace lexCalculator.Linking
 			AssignFunction(context, UnaryOperation.Exponent);
 			AssignFunction(context, UnaryOperation.NaturalLogarithm);
 			AssignFunction(context, BinaryOperation.Logarithm);
+			
+			AssignFunction(context, UnaryOperation.Ceiling);
+			AssignFunction(context, UnaryOperation.Floor);
+			AssignFunction(context, UnaryOperation.Round);
 
 			AssignFunction(context, UnaryOperation.SquareRoot);
 			AssignFunction(context, UnaryOperation.CubeRoot);

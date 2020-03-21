@@ -77,6 +77,7 @@
     <Compile Include="Types\Token.cs" />
     <Compile Include="Parsing\ParseRules.cs" />
     <Compile Include="Types\TreeNodes\BinaryOperationTreeNode.cs" />
+    <Compile Include="Types\TreeNodes\DerivativeTreeNode.cs" />
     <Compile Include="Types\TreeNodes\FunctionIndexTreeNode.cs" />
     <Compile Include="Types\TreeNodes\FunctionParameterTreeNode.cs" />
     <Compile Include="Types\TreeNodes\ListOperationTreeNode.cs" />

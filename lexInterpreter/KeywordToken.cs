@@ -14,7 +14,9 @@ namespace lexInterpreter
 			While,
 			Import,
 			Exit,
-			Newline
+			Newline,
+			DrawTree,
+			Optimize
 		}
 
 		public readonly Type KeywordType;

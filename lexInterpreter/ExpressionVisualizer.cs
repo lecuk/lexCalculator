@@ -116,6 +116,17 @@ namespace lexInterpreter
 					VisualizeAsTreeRecursion(bTreeNode.RightChild, variableTable, functionTable, recursivelyVisualiseFunctions, colorStr + (char)ConsoleColor.Yellow);
 					break;
 				}
+
+				case TernaryOperationTreeNode tTreeNode:
+				{
+					Console.ForegroundColor = ConsoleColor.Cyan;
+					Console.WriteLine(String.Format("[{0}]", tTreeNode.Operation.FunctionName));
+					Console.ResetColor();
+					VisualizeAsTreeRecursion(tTreeNode.LeftChild, variableTable, functionTable, recursivelyVisualiseFunctions, colorStr + (char)ConsoleColor.Cyan);
+					VisualizeAsTreeRecursion(tTreeNode.MiddleChild, variableTable, functionTable, recursivelyVisualiseFunctions, colorStr + (char)ConsoleColor.Cyan);
+					VisualizeAsTreeRecursion(tTreeNode.RightChild, variableTable, functionTable, recursivelyVisualiseFunctions, colorStr + (char)ConsoleColor.Cyan);
+					break;
+				}
 			}
 		}
 

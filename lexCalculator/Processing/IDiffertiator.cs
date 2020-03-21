@@ -2,7 +2,7 @@
 
 namespace lexCalculator.Processing
 {
-	interface IDiffertiator
+	public interface IDifferentiator
 	{
 		FinishedFunction FindDifferential(FinishedFunction func, int index);
 	}
