@@ -1,0 +1,11 @@
+﻿// Shows the difference between optimized and unoptimized functions
+
+f(x) = x^2
+
+df(x) = d:x f(x)
+
+~tree df
+
+~optimize df
+
+~tree df

@@ -1,0 +1,16 @@
+﻿numberToCheck = 1
+numberToDivideBy = 1
+
+maxNumber = 1000
+maxDivisor = ceil(sqrt(maxNumber))
+
+~while (numberToCheck <= maxNumber)
+{
+	~while (numberToDivideBy <= maxNumber)
+	{
+		numberToDivideBy += 1
+	}	
+	~output numberToCheck
+
+	numberToCheck += 1
+}
