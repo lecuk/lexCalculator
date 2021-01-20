@@ -67,12 +67,32 @@ namespace lexCalculator.Calculation
 			return Math.Pow(x, 0.3333333333333333333333);
 		}
 	
+		public static bool IsWhole(double x)
+		{
+			return Math.Abs(x % 1.0) <= (Double.Epsilon * 100);
+		}
+
 		// using S.Ramanujan's factorial approximation formula
 		public static double Factorial(double x)
+		{
+			return IsWhole(x) ? WholeFactorial((long)x) : RamanujanApproxFactorial(x);
+		}
+		
+		public static double RamanujanApproxFactorial(double x)
 		{
 			return (x < 0) ? Double.NaN
 				: (x == 0) ? 1.0
 				: Math.Sqrt(2 * Math.PI * x) * Math.Pow(x / Math.E, x) * Math.Exp(1.0 / (12.0 * x) - 1 / (360.0 * x * x * x));
+		}
+
+		public static double WholeFactorial(long x)
+		{
+			double product = 1;
+			for (long i = 2; i <= x; ++i)
+			{
+				product *= i;
+			}
+			return product;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
