@@ -167,7 +167,7 @@ namespace lexCalculator.Parsing
 				factorialToken is SymbolToken factorialSymbolToken &&
 				factorialSymbolToken.Symbol == '!')
 			{
-				context.TryGetNextToken(out factorialToken); // eat factorial token
+				context.EatLastToken(); // eat factorial token
 
 				term = new UnaryOperationTreeNode(UnaryOperation.Factorial, term);
 			}
@@ -185,7 +185,7 @@ namespace lexCalculator.Parsing
 			termStack.Push(result);
 		}
 
-		// expression is parsed using Dijkstra's shunting-yard algorithm.
+		// expression is parsed using modified Dijkstra's shunting-yard algorithm.
 		TreeNode ParseExpression(ConstructionContext context, params char[] stopSymbols)
 		{
 			Stack<TreeNode> termStack = new Stack<TreeNode>();
