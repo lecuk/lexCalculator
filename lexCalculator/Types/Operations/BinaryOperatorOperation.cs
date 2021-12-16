@@ -30,6 +30,6 @@ namespace lexCalculator.Types.Operations
 		public static readonly BinaryOperatorOperation Multiplication = new BinaryOperatorOperation("mul", MoreMath.Mul, 1, true, "*");
 		public static readonly BinaryOperatorOperation Division = new BinaryOperatorOperation("div", MoreMath.Div, 1, true, "/");
 		public static readonly BinaryOperatorOperation Power = new BinaryOperatorOperation("pow", Math.Pow, 3, false, "^");
-		public static readonly BinaryOperatorOperation Remainder = new BinaryOperatorOperation("rem", Math.IEEERemainder, 2, false, "%");
+		public static readonly BinaryOperatorOperation Remainder = new BinaryOperatorOperation("rem", MoreMath.Remainder, 2, false, "%");
 	}
 }

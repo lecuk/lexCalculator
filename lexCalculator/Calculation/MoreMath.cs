@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using System.Numerics;
 
 namespace lexCalculator.Calculation
 {
@@ -66,7 +65,7 @@ namespace lexCalculator.Calculation
 		{
 			return Math.Pow(x, 0.3333333333333333333333);
 		}
-	
+
 		public static bool IsWhole(double x)
 		{
 			return Math.Abs(x % 1.0) <= (Double.Epsilon * 100);
@@ -77,7 +76,7 @@ namespace lexCalculator.Calculation
 		{
 			return IsWhole(x) ? WholeFactorial((long)x) : RamanujanApproxFactorial(x);
 		}
-		
+
 		public static double RamanujanApproxFactorial(double x)
 		{
 			return (x < 0) ? Double.NaN
@@ -129,6 +128,12 @@ namespace lexCalculator.Calculation
 			return x / y;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static double Remainder(double x, double y)
+		{
+			return x % y;
+		}
+
 		// log_p(x) = ln(x) / ln(p)
 		public static double Log(double p, double x)
 		{
@@ -146,7 +151,7 @@ namespace lexCalculator.Calculation
 		{
 			while (y > 0.000001)
 			{
-				double rem = Math.IEEERemainder(x, y);
+				double rem = Remainder(x, y);
 				x = y;
 				y = rem;
 			}
